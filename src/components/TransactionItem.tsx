@@ -1,0 +1,34 @@
+import type { Transaction } from "../types/transaction"
+
+type TransactionItemProps = {
+  transaction: Transaction
+}
+
+function TransactionItem({ transaction }: TransactionItemProps) {
+  return (
+    <div className="flex items-center justify-between rounded-xl bg-slate-900 p-5">
+      <div>
+        <h3 className="font-semibold">
+          {transaction.description}
+        </h3>
+
+        <p className="mt-1 text-sm text-slate-400">
+          {transaction.category} · {transaction.date}
+        </p>
+      </div>
+
+      <p
+        className={
+          transaction.type === "income"
+            ? "font-semibold text-emerald-400"
+            : "font-semibold text-red-400"
+        }
+      >
+        {transaction.type === "income" ? "+" : "-"}₦
+        {transaction.amount.toLocaleString()}
+      </p>
+    </div>
+  )
+}
+
+export default TransactionItem
