@@ -1,3 +1,4 @@
+import { NavLink } from "react-router-dom"
 import {
   BarChart3,
   CreditCard,
@@ -10,22 +11,22 @@ const navigation = [
   {
     label: "Dashboard",
     icon: LayoutDashboard,
-    active: true,
+    path: "/",
   },
   {
     label: "Transactions",
     icon: CreditCard,
-    active: false,
+    path: "/transactions",
   },
   {
     label: "Analytics",
     icon: BarChart3,
-    active: false,
+    path: "/analytics",
   },
   {
     label: "Accounts",
     icon: Wallet,
-    active: false,
+    path: "/accounts",
   },
 ]
 
@@ -41,24 +42,27 @@ function Sidebar() {
       </div>
 
       <nav className="mt-10 space-y-2">
-        {navigation.map((item) => {
-          const Icon = item.icon
+  {navigation.map((item) => {
+    const Icon = item.icon
 
-          return (
-            <button
-              key={item.label}
-              className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition ${
-                item.active
-                  ? "bg-slate-800 text-white"
-                  : "text-slate-400 hover:bg-slate-900 hover:text-white"
-              }`}
-            >
-              <Icon size={19} />
-              {item.label}
-            </button>
-          )
-        })}
-      </nav>
+    return (
+      <NavLink
+        key={item.label}
+        to={item.path}
+        className={({ isActive }) =>
+          `flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition ${
+            isActive
+              ? "bg-slate-800 text-white"
+              : "text-slate-400 hover:bg-slate-900 hover:text-white"
+          }`
+        }
+      >
+        <Icon size={19} />
+        {item.label}
+      </NavLink>
+    )
+  })}
+</nav>
 
       <div className="mt-8 border-t border-slate-800 pt-6">
         <button className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-400 transition hover:bg-slate-900 hover:text-white">
