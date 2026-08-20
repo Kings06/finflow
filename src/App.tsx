@@ -1,6 +1,7 @@
 import Header from "./components/Header"
 import Sidebar from "./components/Sidebar"
 import SummaryCards from "./components/SummaryCards"
+import FinancialChart from "./components/FinancialChart"
 import TransactionList from "./components/TransactionList"
 
 function App() {
@@ -14,6 +15,8 @@ function App() {
             <Header />
 
             <SummaryCards />
+
+            <FinancialChart />
 
             <TransactionList />
           </div>
