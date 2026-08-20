@@ -8,6 +8,7 @@ import Transactions from "./pages/Transactions"
 import Analytics from "./pages/Analytics"
 import Accounts from "./pages/Accounts"
 import ApiTest from "./pages/ApiTest"
+import TransactionsApi from "./pages/TransactionsApi"
 
 function App() {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
@@ -44,6 +45,10 @@ function App() {
                   element={<Accounts />}
                 />
                 <Route path="/api-test" element={<ApiTest />} />
+                <Route
+                  path="/transactions-api"
+                  element={<TransactionsApi />}
+                />
               </Routes>
             </div>
           </main>
