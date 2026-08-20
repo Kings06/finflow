@@ -1,17 +1,47 @@
+import { useMemo } from "react"
 import {
+  Bar,
+  BarChart,
   CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts"
 
-import { chartData } from "../data/chartData"
+import { useTransactions } from "../hooks/useTransactions"
 
 function FinancialChart() {
+  const { transactions, loading, error } = useTransactions()
+
+  const chartData = useMemo(() => {
+    return transactions.slice(0, 7).map((transaction) => ({
+      name: transaction.description.slice(0, 10),
+      income:
+        transaction.type === "income"
+          ? transaction.amount
+          : 0,
+      expenses:
+        transaction.type === "expense"
+          ? transaction.amount
+          : 0,
+    }))
+  }, [transactions])
+
+  if (loading) {
+    return (
+      <section className="mt-8 h-[400px] animate-pulse rounded-2xl bg-slate-900" />
+    )
+  }
+
+  if (error) {
+    return (
+      <section className="mt-8 rounded-2xl bg-red-950/40 p-6 text-red-400">
+        {error}
+      </section>
+    )
+  }
+
   return (
     <section className="mt-8 rounded-2xl bg-slate-900 p-6">
       <div className="mb-6">
@@ -20,39 +50,35 @@ function FinancialChart() {
         </h2>
 
         <p className="mt-1 text-sm text-slate-400">
-          Income vs expenses over the last 7 months
+          Income and expenses from your recent transactions.
         </p>
       </div>
 
-      <div className="h-80 w-full">
+      <div className="h-[320px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData}>
+          <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
 
-            <XAxis dataKey="month" />
+            <XAxis dataKey="name" />
 
             <YAxis />
 
             <Tooltip />
 
-            <Legend />
-
-            <Line
-              type="monotone"
+            <Bar
               dataKey="income"
-              stroke="#34d399"
-              strokeWidth={2}
-              dot={false}
+              name="Income"
+              fill="#34d399"
+              radius={[6, 6, 0, 0]}
             />
 
-            <Line
-              type="monotone"
+            <Bar
               dataKey="expenses"
-              stroke="#f87171"
-              strokeWidth={2}
-              dot={false}
+              name="Expenses"
+              fill="#f87171"
+              radius={[6, 6, 0, 0]}
             />
-          </LineChart>
+          </BarChart>
         </ResponsiveContainer>
       </div>
     </section>
