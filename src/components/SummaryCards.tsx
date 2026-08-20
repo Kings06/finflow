@@ -1,30 +1,60 @@
-import { transactions } from "../data/transactions"
+import { useMemo } from "react"
+import { useTransactions } from "../hooks/useTransactions"
 
 function SummaryCards() {
-  const totalIncome = transactions
-    .filter((transaction) => transaction.type === "income")
-    .reduce((total, transaction) => total + transaction.amount, 0)
+  const { transactions, loading, error } = useTransactions()
 
-  const totalExpenses = transactions
-    .filter((transaction) => transaction.type === "expense")
-    .reduce((total, transaction) => total + transaction.amount, 0)
+  const summary = useMemo(() => {
+    const totalIncome = transactions
+      .filter((transaction) => transaction.type === "income")
+      .reduce((total, transaction) => total + transaction.amount, 0)
 
-  const totalBalance = totalIncome - totalExpenses
+    const totalExpenses = transactions
+      .filter((transaction) => transaction.type === "expense")
+      .reduce((total, transaction) => total + transaction.amount, 0)
+
+    return {
+      totalIncome,
+      totalExpenses,
+      totalBalance: totalIncome - totalExpenses,
+    }
+  }, [transactions])
+
+  if (loading) {
+    return (
+      <section className="mt-8 grid gap-4 md:grid-cols-3">
+        {["Balance", "Income", "Expenses"].map((item) => (
+          <div
+            key={item}
+            className="h-36 animate-pulse rounded-2xl bg-slate-900"
+          />
+        ))}
+      </section>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="mt-8 rounded-2xl bg-red-950/40 p-6 text-red-400">
+        {error}
+      </div>
+    )
+  }
 
   const cards = [
     {
       title: "Total Balance",
-      amount: totalBalance,
+      amount: summary.totalBalance,
       description: "Available balance",
     },
     {
       title: "Total Income",
-      amount: totalIncome,
+      amount: summary.totalIncome,
       description: "Money received",
     },
     {
       title: "Total Expenses",
-      amount: totalExpenses,
+      amount: summary.totalExpenses,
       description: "Money spent",
     },
   ]
