@@ -1,15 +1,19 @@
 import { useMemo, useState } from "react"
-import { transactions } from "../data/transactions"
+import { useTransactions } from "../hooks/useTransactions"
 import TransactionItem from "../components/TransactionItem"
 
 function Transactions() {
+  const { transactions, loading, error } = useTransactions()
+
   const [search, setSearch] = useState("")
   const [typeFilter, setTypeFilter] = useState("all")
   const [categoryFilter, setCategoryFilter] = useState("all")
 
   const categories = [
     "all",
-    ...new Set(transactions.map((transaction) => transaction.category)),
+    ...new Set(
+      transactions.map((transaction) => transaction.category),
+    ),
   ]
 
   const filteredTransactions = useMemo(() => {
@@ -19,15 +23,48 @@ function Transactions() {
         .includes(search.toLowerCase())
 
       const matchesType =
-        typeFilter === "all" || transaction.type === typeFilter
+        typeFilter === "all" ||
+        transaction.type === typeFilter
 
       const matchesCategory =
         categoryFilter === "all" ||
         transaction.category === categoryFilter
 
-      return matchesSearch && matchesType && matchesCategory
+      return (
+        matchesSearch &&
+        matchesType &&
+        matchesCategory
+      )
     })
-  }, [search, typeFilter, categoryFilter])
+  }, [transactions, search, typeFilter, categoryFilter])
+
+  if (loading) {
+    return (
+      <div>
+        <h1 className="text-3xl font-bold">
+          Transactions
+        </h1>
+
+        <p className="mt-4 text-slate-400">
+          Loading transactions...
+        </p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div>
+        <h1 className="text-3xl font-bold">
+          Transactions
+        </h1>
+
+        <p className="mt-4 text-red-400">
+          {error}
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -44,13 +81,17 @@ function Transactions() {
           type="text"
           placeholder="Search transactions..."
           value={search}
-          onChange={(event) => setSearch(event.target.value)}
+          onChange={(event) =>
+            setSearch(event.target.value)
+          }
           className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm outline-none placeholder:text-slate-500 focus:border-emerald-500"
         />
 
         <select
           value={typeFilter}
-          onChange={(event) => setTypeFilter(event.target.value)}
+          onChange={(event) =>
+            setTypeFilter(event.target.value)
+          }
           className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm outline-none focus:border-emerald-500"
         >
           <option value="all">All Types</option>
@@ -60,12 +101,19 @@ function Transactions() {
 
         <select
           value={categoryFilter}
-          onChange={(event) => setCategoryFilter(event.target.value)}
+          onChange={(event) =>
+            setCategoryFilter(event.target.value)
+          }
           className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm outline-none focus:border-emerald-500"
         >
           {categories.map((category) => (
-            <option key={category} value={category}>
-              {category === "all" ? "All Categories" : category}
+            <option
+              key={category}
+              value={category}
+            >
+              {category === "all"
+                ? "All Categories"
+                : category}
             </option>
           ))}
         </select>

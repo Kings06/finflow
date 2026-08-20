@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react"
 import { getTransactions } from "../api/transactions"
-import type { ApiPost } from "../types/api"
+import type { Transaction } from "../types/transaction"
 
 type UseTransactionsResult = {
-  transactions: ApiPost[]
+  transactions: Transaction[]
   loading: boolean
   error: string | null
 }
 
 export function useTransactions(): UseTransactionsResult {
-  const [transactions, setTransactions] = useState<ApiPost[]>([])
+  const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
