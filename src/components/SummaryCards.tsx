@@ -1,24 +1,10 @@
-import { useMemo } from "react"
 import { useTransactions } from "../hooks/useTransactions"
+import { calculateFinancialSummary } from "../utils/financial"
 
 function SummaryCards() {
   const { transactions, loading, error } = useTransactions()
 
-  const summary = useMemo(() => {
-    const totalIncome = transactions
-      .filter((transaction) => transaction.type === "income")
-      .reduce((total, transaction) => total + transaction.amount, 0)
-
-    const totalExpenses = transactions
-      .filter((transaction) => transaction.type === "expense")
-      .reduce((total, transaction) => total + transaction.amount, 0)
-
-    return {
-      totalIncome,
-      totalExpenses,
-      totalBalance: totalIncome - totalExpenses,
-    }
-  }, [transactions])
+  const summary = calculateFinancialSummary(transactions)
 
   if (loading) {
     return (
