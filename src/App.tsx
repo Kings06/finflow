@@ -1,5 +1,7 @@
+import { useState } from "react"
 import { BrowserRouter, Route, Routes } from "react-router-dom"
 
+import MobileNav from "./components/MobileNav"
 import Sidebar from "./components/Sidebar"
 import Dashboard from "./pages/Dashboard"
 import Transactions from "./pages/Transactions"
@@ -7,9 +9,20 @@ import Analytics from "./pages/Analytics"
 import Accounts from "./pages/Accounts"
 
 function App() {
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
+
+  const toggleMobileNav = () => {
+    setIsMobileNavOpen((current) => !current)
+  }
+
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-slate-950 text-white">
+        <MobileNav
+          isOpen={isMobileNavOpen}
+          onToggle={toggleMobileNav}
+        />
+
         <div className="flex">
           <Sidebar />
 
@@ -17,9 +30,18 @@ function App() {
             <div className="mx-auto max-w-7xl">
               <Routes>
                 <Route path="/" element={<Dashboard />} />
-                <Route path="/transactions" element={<Transactions />} />
-                <Route path="/analytics" element={<Analytics />} />
-                <Route path="/accounts" element={<Accounts />} />
+                <Route
+                  path="/transactions"
+                  element={<Transactions />}
+                />
+                <Route
+                  path="/analytics"
+                  element={<Analytics />}
+                />
+                <Route
+                  path="/accounts"
+                  element={<Accounts />}
+                />
               </Routes>
             </div>
           </main>
