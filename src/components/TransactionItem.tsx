@@ -13,7 +13,14 @@ function TransactionItem({ transaction }: TransactionItemProps) {
         </h3>
 
         <p className="mt-1 text-sm text-slate-400">
-          {transaction.category} · {transaction.date}
+          {transaction.category} · {new Date(transaction.date).toLocaleDateString(
+  "en-US",
+  {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  },
+)}
         </p>
       </div>
 

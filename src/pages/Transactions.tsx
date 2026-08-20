@@ -17,7 +17,8 @@ function Transactions() {
   ]
 
   const filteredTransactions = useMemo(() => {
-    return transactions.filter((transaction) => {
+  return transactions
+    .filter((transaction) => {
       const matchesSearch = transaction.description
         .toLowerCase()
         .includes(search.toLowerCase())
@@ -36,7 +37,12 @@ function Transactions() {
         matchesCategory
       )
     })
-  }, [transactions, search, typeFilter, categoryFilter])
+    .sort(
+      (a, b) =>
+        new Date(b.date).getTime() -
+        new Date(a.date).getTime(),
+    )
+}, [transactions, search, typeFilter, categoryFilter])
 
   if (loading) {
     return (
