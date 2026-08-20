@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard"
 import Transactions from "./pages/Transactions"
 import Analytics from "./pages/Analytics"
 import Accounts from "./pages/Accounts"
+import ApiTest from "./pages/ApiTest"
 
 function App() {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
@@ -42,6 +43,7 @@ function App() {
                   path="/accounts"
                   element={<Accounts />}
                 />
+                <Route path="/api-test" element={<ApiTest />} />
               </Routes>
             </div>
           </main>
