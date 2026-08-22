@@ -1,4 +1,5 @@
 import { Link, useParams } from "react-router-dom"
+import { formatCurrency } from "../utils/currency"
 import { useTransactionsContext } from "../context/TransactionsContext"
 
 function TransactionDetails() {
@@ -89,8 +90,8 @@ function TransactionDetails() {
                 : "text-2xl font-bold text-red-400"
             }
           >
-            {isIncome ? "+" : "-"}₦
-            {transaction.amount.toLocaleString()}
+            {isIncome ? "+" : "-"}
+         {formatCurrency(transaction.amount)}
           </span>
         </div>
 

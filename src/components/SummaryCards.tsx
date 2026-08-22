@@ -1,5 +1,6 @@
 import { useTransactionsContext } from "../context/TransactionsContext"
 import { calculateFinancialSummary } from "../utils/financial"
+import { formatCurrency } from "../utils/currency"
 
 function SummaryCards() {
   const { transactions, loading, error } = useTransactionsContext()
@@ -57,7 +58,7 @@ function SummaryCards() {
           </p>
 
           <h2 className="mt-3 text-3xl font-bold">
-            ₦{card.amount.toLocaleString()}
+            {formatCurrency(card.amount)}
           </h2>
 
           <p className="mt-2 text-sm text-slate-500">

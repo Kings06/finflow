@@ -1,4 +1,5 @@
 import type { Transaction } from "../types/transaction"
+import { formatCurrency } from "../utils/currency"
 import { Link } from "react-router-dom"
 
 type TransactionItemProps = {
@@ -37,8 +38,8 @@ function TransactionItem({ transaction }: TransactionItemProps) {
               : "font-semibold text-red-400"
           }
         >
-          {transaction.type === "income" ? "+" : "-"}₦
-          {transaction.amount.toLocaleString()}
+          {transaction.type === "income" ? "+" : "-"}
+          {formatCurrency(transaction.amount)}
         </p>
       </div>
     </Link>
