@@ -1,6 +1,10 @@
 import { useMemo, useState } from "react"
 import { useTransactionsContext } from "../context/TransactionsContext"
 import TransactionItem from "../components/TransactionItem"
+import {
+  sortTransactions,
+  type TransactionSort,
+} from "../utils/transactions"
 
 function Transactions() {
   const { transactions, loading, error } = useTransactionsContext()
@@ -8,6 +12,7 @@ function Transactions() {
   const [search, setSearch] = useState("")
   const [typeFilter, setTypeFilter] = useState("all")
   const [categoryFilter, setCategoryFilter] = useState("all")
+  const [sort, setSort] = useState<TransactionSort>("newest")
 
   const categories = [
     "all",
@@ -17,8 +22,7 @@ function Transactions() {
   ]
 
   const filteredTransactions = useMemo(() => {
-  return transactions
-    .filter((transaction) => {
+    const filtered = transactions.filter((transaction) => {
       const matchesSearch = transaction.description
         .toLowerCase()
         .includes(search.toLowerCase())
@@ -37,12 +41,15 @@ function Transactions() {
         matchesCategory
       )
     })
-    .sort(
-      (a, b) =>
-        new Date(b.date).getTime() -
-        new Date(a.date).getTime(),
-    )
-}, [transactions, search, typeFilter, categoryFilter])
+
+    return sortTransactions(filtered, sort)
+  }, [
+    transactions,
+    search,
+    typeFilter,
+    categoryFilter,
+    sort,
+  ])
 
   if (loading) {
     return (
@@ -73,15 +80,15 @@ function Transactions() {
   }
 
   const hasActiveFilters =
-  search !== "" ||
-  typeFilter !== "all" ||
-  categoryFilter !== "all"
+    search !== "" ||
+    typeFilter !== "all" ||
+    categoryFilter !== "all"
 
-const clearFilters = () => {
-  setSearch("")
-  setTypeFilter("all")
-  setCategoryFilter("all")
-}
+  const clearFilters = () => {
+    setSearch("")
+    setTypeFilter("all")
+    setCategoryFilter("all")
+  }
 
   return (
     <div>
@@ -93,7 +100,7 @@ const clearFilters = () => {
         View and manage your financial transactions.
       </p>
 
-      <div className="mt-8 grid gap-4 md:grid-cols-3">
+      <div className="mt-8 grid gap-4 md:grid-cols-4">
         <input
           type="text"
           placeholder="Search transactions..."
@@ -103,6 +110,19 @@ const clearFilters = () => {
           }
           className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm outline-none placeholder:text-slate-500 focus:border-emerald-500"
         />
+
+        <select
+          value={sort}
+          onChange={(event) =>
+            setSort(event.target.value as TransactionSort)
+          }
+          className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm outline-none focus:border-emerald-500"
+        >
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="highest">Highest amount</option>
+          <option value="lowest">Lowest amount</option>
+        </select>
 
         <select
           value={typeFilter}
@@ -137,23 +157,23 @@ const clearFilters = () => {
       </div>
 
       <div className="mt-6 flex items-center justify-between">
-  <p className="text-sm text-slate-400">
-    {filteredTransactions.length}{" "}
-    {filteredTransactions.length === 1
-      ? "transaction"
-      : "transactions"}
-  </p>
+        <p className="text-sm text-slate-400">
+          {filteredTransactions.length}{" "}
+          {filteredTransactions.length === 1
+            ? "transaction"
+            : "transactions"}
+        </p>
 
-  {hasActiveFilters && (
-    <button
-      type="button"
-      onClick={clearFilters}
-      className="text-sm font-medium text-emerald-400 transition hover:text-emerald-300"
-    >
-      Clear filters
-    </button>
-  )}
-</div>
+        {hasActiveFilters && (
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="text-sm font-medium text-emerald-400 transition hover:text-emerald-300"
+          >
+            Clear filters
+          </button>
+        )}
+      </div>
 
       <div className="mt-8 space-y-4">
         {filteredTransactions.length > 0 ? (
