@@ -72,6 +72,17 @@ function Transactions() {
     )
   }
 
+  const hasActiveFilters =
+  search !== "" ||
+  typeFilter !== "all" ||
+  categoryFilter !== "all"
+
+const clearFilters = () => {
+  setSearch("")
+  setTypeFilter("all")
+  setCategoryFilter("all")
+}
+
   return (
     <div>
       <h1 className="text-3xl font-bold">
@@ -124,6 +135,25 @@ function Transactions() {
           ))}
         </select>
       </div>
+
+      <div className="mt-6 flex items-center justify-between">
+  <p className="text-sm text-slate-400">
+    {filteredTransactions.length}{" "}
+    {filteredTransactions.length === 1
+      ? "transaction"
+      : "transactions"}
+  </p>
+
+  {hasActiveFilters && (
+    <button
+      type="button"
+      onClick={clearFilters}
+      className="text-sm font-medium text-emerald-400 transition hover:text-emerald-300"
+    >
+      Clear filters
+    </button>
+  )}
+</div>
 
       <div className="mt-8 space-y-4">
         {filteredTransactions.length > 0 ? (
