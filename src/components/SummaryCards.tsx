@@ -1,6 +1,7 @@
 import { useTransactionsContext } from "../context/TransactionsContext"
 import { calculateFinancialSummary } from "../utils/financial"
 import { formatCurrency } from "../utils/currency"
+import { getFinancialStatus } from "../utils/financialStatus"
 
 function SummaryCards() {
   const { transactions, loading, error } = useTransactionsContext()
@@ -45,6 +46,16 @@ function SummaryCards() {
       description: "Money spent",
     },
   ]
+  const balanceStatus = getFinancialStatus(
+  summary.totalBalance,
+)
+
+const balanceColor =
+  balanceStatus === "positive"
+    ? "text-emerald-400"
+    : balanceStatus === "negative"
+      ? "text-red-400"
+      : "text-slate-300"
 
   return (
     <section className="mt-8 grid gap-4 md:grid-cols-3">
@@ -57,7 +68,12 @@ function SummaryCards() {
             {card.title}
           </p>
 
-          <h2 className="mt-3 text-3xl font-bold">
+          <h2 className={`mt-3 text-3xl font-bold ${
+            card.title === "Total Balance"
+              ? balanceColor
+              : "text-white"
+             }`}
+          >
             {formatCurrency(card.amount)}
           </h2>
 
