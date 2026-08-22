@@ -10,23 +10,15 @@ import {
 } from "recharts"
 
 import { useTransactionsContext } from "../context/TransactionsContext"
+import { buildFinancialChartData } from "../utils/chart"
+import { formatCurrency } from "../utils/currency"
 
 function FinancialChart() {
   const { transactions, loading, error } = useTransactionsContext()
 
-  const chartData = useMemo(() => {
-    return transactions.slice(0, 7).map((transaction) => ({
-      name: transaction.description.slice(0, 10),
-      income:
-        transaction.type === "income"
-          ? transaction.amount
-          : 0,
-      expenses:
-        transaction.type === "expense"
-          ? transaction.amount
-          : 0,
-    }))
-  }, [transactions])
+  const chartData = useMemo(() => buildFinancialChartData(transactions),
+  [transactions],
+  )
 
   if (loading) {
     return (
@@ -59,11 +51,19 @@ function FinancialChart() {
           <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
 
-            <XAxis dataKey="name" />
+            <XAxis
+              dataKey="date"
+              tickFormatter={(value) =>
+               new Date(value).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+              })
+              }
+              />
 
             <YAxis />
 
-            <Tooltip />
+            <Tooltip formatter={(value) => formatCurrency(Number(value))} />
 
             <Bar
               dataKey="income"
