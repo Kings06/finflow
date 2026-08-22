@@ -5,6 +5,7 @@ import MobileNav from "./components/MobileNav"
 import Sidebar from "./components/Sidebar"
 import Dashboard from "./pages/Dashboard"
 import Transactions from "./pages/Transactions"
+import TransactionDetails from "./pages/TransactionDetails"
 import Analytics from "./pages/Analytics"
 import Accounts from "./pages/Accounts"
 
@@ -34,6 +35,10 @@ function App() {
                 <Route
                   path="/transactions"
                   element={<Transactions />}
+                />
+                <Route
+                  path="/transactions/:id"
+                  element={<TransactionDetails />}
                 />
                 <Route
                   path="/analytics"
