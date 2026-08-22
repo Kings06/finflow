@@ -1,8 +1,8 @@
-import { useTransactions } from "../hooks/useTransactions"
+import { useTransactionsContext } from "../context/TransactionsContext"
 import TransactionItem from "./TransactionItem"
 
 function TransactionList() {
-  const { transactions, loading, error } = useTransactions()
+  const { transactions, loading, error } = useTransactionsContext()
 
   return (
     <section className="mt-8">

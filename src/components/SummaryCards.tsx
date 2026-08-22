@@ -1,8 +1,8 @@
-import { useTransactions } from "../hooks/useTransactions"
+import { useTransactionsContext } from "../context/TransactionsContext"
 import { calculateFinancialSummary } from "../utils/financial"
 
 function SummaryCards() {
-  const { transactions, loading, error } = useTransactions()
+  const { transactions, loading, error } = useTransactionsContext()
 
   const summary = calculateFinancialSummary(transactions)
 

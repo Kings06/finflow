@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react"
-import { useTransactions } from "../hooks/useTransactions"
+import { useTransactionsContext } from "../context/TransactionsContext"
 import TransactionItem from "../components/TransactionItem"
 
 function Transactions() {
-  const { transactions, loading, error } = useTransactions()
+  const { transactions, loading, error } = useTransactionsContext()
 
   const [search, setSearch] = useState("")
   const [typeFilter, setTypeFilter] = useState("all")

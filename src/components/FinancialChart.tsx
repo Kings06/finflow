@@ -9,10 +9,10 @@ import {
   YAxis,
 } from "recharts"
 
-import { useTransactions } from "../hooks/useTransactions"
+import { useTransactionsContext } from "../context/TransactionsContext"
 
 function FinancialChart() {
-  const { transactions, loading, error } = useTransactions()
+  const { transactions, loading, error } = useTransactionsContext()
 
   const chartData = useMemo(() => {
     return transactions.slice(0, 7).map((transaction) => ({
