@@ -11,7 +11,7 @@ function Dashboard() {
 
       <SummaryCards />
 
-      <div className="mt-8 grid gap-8 xl:grid-cols-3">
+      <div className="mt-10 grid gap-8 xl:grid-cols-3">
         <div className="xl:col-span-2">
           <FinancialChart />
         </div>

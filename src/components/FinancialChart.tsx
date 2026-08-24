@@ -14,10 +14,12 @@ import { buildFinancialChartData } from "../utils/chart"
 import { formatCurrency } from "../utils/currency"
 
 function FinancialChart() {
-  const { transactions, loading, error } = useTransactionsContext()
+  const { transactions, loading, error } =
+    useTransactionsContext()
 
-  const chartData = useMemo(() => buildFinancialChartData(transactions),
-  [transactions],
+  const chartData = useMemo(
+    () => buildFinancialChartData(transactions),
+    [transactions],
   )
 
   if (loading) {
@@ -35,9 +37,9 @@ function FinancialChart() {
   }
 
   return (
-    <section className="mt-8 rounded-2xl bg-slate-900 p-6">
+    <section className="mt-8 rounded-2xl border border-slate-800 bg-slate-900 p-6 transition duration-200 hover:border-slate-700">
       <div className="mb-6">
-        <h2 className="text-xl font-semibold">
+        <h2 className="text-xl font-semibold tracking-tight">
           Financial Overview
         </h2>
 
@@ -48,28 +50,55 @@ function FinancialChart() {
 
       <div className="h-[320px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
+          <BarChart
+            data={chartData}
+            margin={{
+              top: 8,
+              right: 8,
+              left: 0,
+              bottom: 8,
+            }}
+          >
+            <CartesianGrid
+              strokeDasharray="3 3"
+              vertical={false}
+            />
 
             <XAxis
               dataKey="date"
               tickFormatter={(value) =>
-               new Date(value).toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-              })
+                new Date(value).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                })
               }
-              />
+              tick={{ fontSize: 12 }}
+              tickLine={false}
+              axisLine={false}
+            />
 
-            <YAxis />
+            <YAxis
+              tickFormatter={(value) =>
+                formatCurrency(Number(value))
+              }
+              tick={{ fontSize: 12 }}
+              tickLine={false}
+              axisLine={false}
+              width={70}
+            />
 
-            <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+            <Tooltip
+              formatter={(value) =>
+                formatCurrency(Number(value))
+              }
+            />
 
             <Bar
               dataKey="income"
               name="Income"
               fill="#34d399"
               radius={[6, 6, 0, 0]}
+              maxBarSize={42}
             />
 
             <Bar
@@ -77,6 +106,7 @@ function FinancialChart() {
               name="Expenses"
               fill="#f87171"
               radius={[6, 6, 0, 0]}
+              maxBarSize={42}
             />
           </BarChart>
         </ResponsiveContainer>

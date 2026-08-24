@@ -24,14 +24,14 @@ function FinancialSummary() {
       : 0
 
   return (
-    <section className="mt-6 rounded-2xl bg-slate-900 p-6">
+    <section className="mt-6 rounded-2xl border border-slate-800 bg-slate-900 p-6 transition duration-200 hover:border-slate-700">
       <div className="flex flex-col gap-6">
         <div>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm font-medium text-slate-400">
             Financial Snapshot
           </p>
 
-          <h2 className="mt-2 text-2xl font-bold">
+          <h2 className="mt-2 text-2xl font-bold tracking-tight">
             You're keeping{" "}
             <span className="text-emerald-400">
               {formatCurrency(summary.totalBalance)}
@@ -43,7 +43,7 @@ function FinancialSummary() {
           </p>
         </div>
 
-        <div className="grid gap-4 border-t border-slate-800 pt-5">
+        <div className="grid gap-5 border-t border-slate-800 pt-5 sm:grid-cols-3">
           <div>
             <p className="text-sm text-slate-500">
               Income

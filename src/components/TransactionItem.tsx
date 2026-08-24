@@ -1,20 +1,24 @@
+import { Link } from "react-router-dom"
 import type { Transaction } from "../types/transaction"
 import { formatCurrency } from "../utils/currency"
-import { Link } from "react-router-dom"
 
 type TransactionItemProps = {
   transaction: Transaction
 }
 
-function TransactionItem({ transaction }: TransactionItemProps) {
+function TransactionItem({
+  transaction,
+}: TransactionItemProps) {
+  const isIncome = transaction.type === "income"
+
   return (
     <Link
       to={`/transactions/${transaction.id}`}
-      className="block"
+      className="block rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
     >
-      <div className="flex items-center justify-between rounded-xl bg-slate-900 p-5 transition hover:bg-slate-800">
-        <div>
-          <h3 className="font-semibold">
+      <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-800 bg-slate-900 p-5 transition duration-200 hover:-translate-y-0.5 hover:border-slate-700 hover:bg-slate-800">
+        <div className="min-w-0">
+          <h3 className="truncate font-semibold">
             {transaction.description}
           </h3>
 
@@ -32,13 +36,13 @@ function TransactionItem({ transaction }: TransactionItemProps) {
         </div>
 
         <p
-          className={
-            transaction.type === "income"
-              ? "font-semibold text-emerald-400"
-              : "font-semibold text-red-400"
-          }
+          className={`shrink-0 font-semibold ${
+            isIncome
+              ? "text-emerald-400"
+              : "text-red-400"
+          }`}
         >
-          {transaction.type === "income" ? "+" : "-"}
+          {isIncome ? "+" : "-"}
           {formatCurrency(transaction.amount)}
         </p>
       </div>
