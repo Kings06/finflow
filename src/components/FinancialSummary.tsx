@@ -20,12 +20,12 @@ function FinancialSummary() {
 
   const savingsRate =
     summary.totalIncome > 0
-      ? ((summary.totalBalance / summary.totalIncome) * 100)
+      ? (summary.totalBalance / summary.totalIncome) * 100
       : 0
 
   return (
     <section className="mt-6 rounded-2xl bg-slate-900 p-6">
-      <div className="flex flex-col justify-between gap-6 md:flex-row md:items-center">
+      <div className="flex flex-col gap-6">
         <div>
           <p className="text-sm text-slate-400">
             Financial Snapshot
@@ -43,7 +43,7 @@ function FinancialSummary() {
           </p>
         </div>
 
-        <div className="flex gap-8">
+        <div className="grid gap-4 border-t border-slate-800 pt-5">
           <div>
             <p className="text-sm text-slate-500">
               Income
