@@ -65,11 +65,20 @@ function Sidebar() {
 </nav>
 
       <div className="mt-8 border-t border-slate-800 pt-6">
-        <button className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-400 transition hover:bg-slate-900 hover:text-white">
-          <Settings size={19} />
-          Settings
-        </button>
-      </div>
+  <NavLink
+    to="/settings"
+    className={({ isActive }) =>
+      `flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition ${
+        isActive
+          ? "bg-slate-800 text-white"
+          : "text-slate-400 hover:bg-slate-900 hover:text-white"
+      }`
+    }
+  >
+    <Settings size={19} />
+    Settings
+  </NavLink>
+</div>
     </aside>
   )
 }

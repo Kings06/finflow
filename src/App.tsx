@@ -8,6 +8,7 @@ import Transactions from "./pages/Transactions"
 import TransactionDetails from "./pages/TransactionDetails"
 import Analytics from "./pages/Analytics"
 import Accounts from "./pages/Accounts"
+import Settings from "./pages/Settings"
 
 
 function App() {
@@ -47,6 +48,10 @@ function App() {
                 <Route
                   path="/accounts"
                   element={<Accounts />}
+                />
+                <Route
+                  path="/settings"
+                  element={<Settings />}
                 />
               </Routes>
             </div>
