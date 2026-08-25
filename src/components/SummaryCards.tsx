@@ -15,7 +15,7 @@ function SummaryCards() {
         {["Balance", "Income", "Expenses"].map((item) => (
           <div
             key={item}
-            className="h-36 animate-pulse rounded-2xl bg-slate-900"
+            className="h-36 animate-pulse rounded-2xl bg-[var(--surface)]"
           />
         ))}
       </section>
@@ -24,7 +24,7 @@ function SummaryCards() {
 
   if (error) {
     return (
-      <div className="mt-8 rounded-2xl bg-red-950/40 p-6 text-red-400">
+      <div className="mt-8 rounded-2xl border border-red-500/20 bg-red-500/10 p-6 text-red-400">
         {error}
       </div>
     )
@@ -54,19 +54,19 @@ function SummaryCards() {
 
   const balanceColor =
     balanceStatus === "positive"
-      ? "text-emerald-400"
+      ? "text-emerald-500"
       : balanceStatus === "negative"
-        ? "text-red-400"
-        : "text-slate-300"
+        ? "text-red-500"
+        : "text-[var(--text-secondary)]"
 
   return (
     <section className="mt-8 grid gap-4 md:grid-cols-3">
       {cards.map((card) => (
         <div
           key={card.title}
-          className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition duration-200 hover:-translate-y-0.5 hover:border-slate-700"
+          className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 transition duration-200 hover:-translate-y-0.5 hover:bg-[var(--surface-hover)]"
         >
-          <p className="text-sm font-medium text-slate-400">
+          <p className="text-sm font-medium text-[var(--text-secondary)]">
             {card.title}
           </p>
 
@@ -74,13 +74,13 @@ function SummaryCards() {
             className={`mt-3 text-3xl font-bold tracking-tight ${
               card.title === "Total Balance"
                 ? balanceColor
-                : "text-white"
+                : "text-[var(--text-primary)]"
             }`}
           >
             {formatCurrency(card.amount)}
           </h2>
 
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-[var(--text-muted)]">
             {card.description}
           </p>
         </div>

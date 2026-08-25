@@ -40,7 +40,7 @@ const navigation = [
 function MobileNav({ isOpen, onToggle }: MobileNavProps) {
   return (
     <>
-      <header className="flex items-center justify-between border-b border-slate-800/80 bg-slate-950 px-6 py-4 md:hidden">
+      <header className="flex items-center justify-between border-b border-[var(--border)] bg-[var(--background)] px-6 py-4 transition-colors duration-200 md:hidden">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500 font-bold text-slate-950 shadow-lg shadow-emerald-500/10">
             F
@@ -51,7 +51,7 @@ function MobileNav({ isOpen, onToggle }: MobileNavProps) {
               FinFlow
             </span>
 
-            <p className="text-[11px] text-slate-500">
+            <p className="text-[11px] text-[var(--text-secondary)]">
               Personal finance
             </p>
           </div>
@@ -60,7 +60,7 @@ function MobileNav({ isOpen, onToggle }: MobileNavProps) {
         <button
           type="button"
           onClick={onToggle}
-          className="rounded-xl p-2 text-slate-300 transition duration-200 hover:bg-slate-800 hover:text-white"
+          className="rounded-lg p-2 text-[var(--text-secondary)] transition hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
           aria-label={
             isOpen ? "Close navigation" : "Open navigation"
           }
@@ -70,7 +70,7 @@ function MobileNav({ isOpen, onToggle }: MobileNavProps) {
       </header>
 
       {isOpen && (
-        <div className="border-b border-slate-800/80 bg-slate-950 px-6 py-4 md:hidden">
+        <div className="border-b border-[var(--border)] bg-[var(--background)] px-6 py-4 transition-colors duration-200 md:hidden">
           <nav className="space-y-1.5">
             {navigation.map((item) => {
               const Icon = item.icon
@@ -83,8 +83,8 @@ function MobileNav({ isOpen, onToggle }: MobileNavProps) {
                   className={({ isActive }) =>
                     `group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition duration-200 ${
                       isActive
-                        ? "bg-emerald-500/10 text-emerald-400"
-                        : "text-slate-400 hover:bg-slate-900 hover:text-white"
+                       ? "bg-[var(--surface-hover)] text-[var(--text-primary)]"
+  : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
                     }`
                   }
                 >
@@ -98,7 +98,7 @@ function MobileNav({ isOpen, onToggle }: MobileNavProps) {
               )
             })}
 
-            <div className="my-3 border-t border-slate-800/80" />
+            <div className="my-3 border-t border-[var(--border)]" />
 
             <NavLink
               to="/settings"
@@ -106,8 +106,8 @@ function MobileNav({ isOpen, onToggle }: MobileNavProps) {
               className={({ isActive }) =>
                 `group flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition duration-200 ${
                   isActive
-                    ? "bg-emerald-500/10 text-emerald-400"
-                    : "text-slate-400 hover:bg-slate-900 hover:text-white"
+                   ? "bg-[var(--surface-hover)] text-[var(--text-primary)]"
+  : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
                 }`
               }
             >

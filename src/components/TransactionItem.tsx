@@ -16,13 +16,13 @@ function TransactionItem({
       to={`/transactions/${transaction.id}`}
       className="block rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
     >
-      <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-800 bg-slate-900 p-5 transition duration-200 hover:-translate-y-0.5 hover:border-slate-700 hover:bg-slate-800">
+      <div className="flex items-center justify-between gap-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 transition duration-200 hover:-translate-y-0.5 hover:border-[var(--border)] hover:bg-[var(--surface-hover)]">
         <div className="min-w-0">
-          <h3 className="truncate font-semibold">
+          <h3 className="truncate font-semibold text-[var(--text-primary)]">
             {transaction.description}
           </h3>
 
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">
             {transaction.category} ·{" "}
             {new Date(transaction.date).toLocaleDateString(
               "en-US",
@@ -38,8 +38,8 @@ function TransactionItem({
         <p
           className={`shrink-0 font-semibold ${
             isIncome
-              ? "text-emerald-400"
-              : "text-red-400"
+              ? "text-emerald-500"
+              : "text-red-500"
           }`}
         >
           {isIncome ? "+" : "-"}

@@ -58,7 +58,7 @@ function Transactions() {
           Transactions
         </h1>
 
-        <p className="mt-2 text-slate-400">
+        <p className="mt-2 text-[var(--text-secondary)]">
           Loading your financial activity...
         </p>
 
@@ -66,7 +66,7 @@ function Transactions() {
           {[1, 2, 3, 4].map((item) => (
             <div
               key={item}
-              className="h-20 animate-pulse rounded-2xl bg-slate-900"
+              className="h-20 animate-pulse rounded-2xl bg-[var(--surface)]"
             />
           ))}
         </div>
@@ -81,7 +81,7 @@ function Transactions() {
           Transactions
         </h1>
 
-        <div className="mt-8 rounded-2xl border border-red-900/50 bg-red-950/30 p-6">
+        <div className="mt-8 rounded-2xl border border-red-500/30 bg-red-500/10 p-6">
           <p className="font-medium text-red-400">
             Unable to load transactions
           </p>
@@ -112,18 +112,18 @@ function Transactions() {
           Transactions
         </h1>
 
-        <p className="mt-2 text-slate-400">
+        <p className="mt-2 text-[var(--text-secondary)]">
           View and manage your financial transactions.
         </p>
       </header>
 
-      <section className="mt-8 rounded-2xl border border-slate-800 bg-slate-900/60 p-5 md:p-6">
+      <section className="mt-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 transition-colors duration-200">
         <div className="mb-5">
-          <h2 className="text-sm font-semibold text-white">
+          <h2 className="text-sm font-semibold text-[var(--text-primary)]">
             Find a transaction
           </h2>
 
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">
             Search, filter, or sort your financial activity.
           </p>
         </div>
@@ -136,20 +136,33 @@ function Transactions() {
             onChange={(event) =>
               setSearch(event.target.value)
             }
-            className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
+            className="rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none transition placeholder:text-[var(--text-muted)] focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
           />
 
           <select
             value={sort}
             onChange={(event) =>
-              setSort(event.target.value as TransactionSort)
+              setSort(
+                event.target.value as TransactionSort,
+              )
             }
-            className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
+            className="rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
           >
-            <option value="newest">Newest first</option>
-            <option value="oldest">Oldest first</option>
-            <option value="highest">Highest amount</option>
-            <option value="lowest">Lowest amount</option>
+            <option value="newest">
+              Newest first
+            </option>
+
+            <option value="oldest">
+              Oldest first
+            </option>
+
+            <option value="highest">
+              Highest amount
+            </option>
+
+            <option value="lowest">
+              Lowest amount
+            </option>
           </select>
 
           <select
@@ -157,11 +170,19 @@ function Transactions() {
             onChange={(event) =>
               setTypeFilter(event.target.value)
             }
-            className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
+            className="rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
           >
-            <option value="all">All Types</option>
-            <option value="income">Income</option>
-            <option value="expense">Expenses</option>
+            <option value="all">
+              All Types
+            </option>
+
+            <option value="income">
+              Income
+            </option>
+
+            <option value="expense">
+              Expenses
+            </option>
           </select>
 
           <select
@@ -169,7 +190,7 @@ function Transactions() {
             onChange={(event) =>
               setCategoryFilter(event.target.value)
             }
-            className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
+            className="rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
           >
             {categories.map((category) => (
               <option
@@ -186,9 +207,9 @@ function Transactions() {
       </section>
 
       <div className="mt-6 flex min-h-6 items-center justify-between">
-        <p className="text-sm text-slate-400">
+        <p className="text-sm text-[var(--text-secondary)]">
           Showing{" "}
-          <span className="font-medium text-slate-200">
+          <span className="font-medium text-[var(--text-primary)]">
             {filteredTransactions.length}
           </span>{" "}
           {filteredTransactions.length === 1
@@ -200,7 +221,7 @@ function Transactions() {
           <button
             type="button"
             onClick={clearFilters}
-            className="text-sm font-medium text-emerald-400 transition hover:text-emerald-300"
+            className="text-sm font-medium text-emerald-500 transition hover:text-emerald-400"
           >
             Clear filters
           </button>
@@ -216,12 +237,12 @@ function Transactions() {
             />
           ))
         ) : (
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-10 text-center">
-            <h2 className="text-lg font-semibold">
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-10 text-center transition-colors duration-200">
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">
               No transactions found
             </h2>
 
-            <p className="mx-auto mt-2 max-w-md text-sm text-slate-400">
+            <p className="mx-auto mt-2 max-w-md text-sm text-[var(--text-secondary)]">
               We couldn't find any transactions matching
               your current search or filters.
             </p>

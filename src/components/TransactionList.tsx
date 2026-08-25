@@ -10,18 +10,18 @@ function TransactionList() {
     <section className="mt-8">
       <div className="flex items-end justify-between">
         <div>
-          <h2 className="text-xl font-semibold">
+          <h2 className="text-xl font-semibold text-[var(--text-primary)]">
             Recent Transactions
           </h2>
 
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">
             Your latest financial activity.
           </p>
         </div>
 
         <Link
           to="/transactions"
-          className="text-sm font-medium text-emerald-400 transition hover:text-emerald-300"
+          className="text-sm font-medium text-emerald-500 transition hover:text-emerald-400"
         >
           View all →
         </Link>
@@ -32,14 +32,14 @@ function TransactionList() {
           {[1, 2, 3].map((item) => (
             <div
               key={item}
-              className="h-20 animate-pulse rounded-2xl bg-slate-900"
+              className="h-20 animate-pulse rounded-2xl bg-[var(--surface)]"
             />
           ))}
         </div>
       )}
 
       {error && (
-        <div className="mt-8 rounded-2xl bg-red-950/40 p-6 text-red-400">
+        <div className="mt-8 rounded-2xl border border-red-500/20 bg-red-500/10 p-6 text-red-500">
           {error}
         </div>
       )}

@@ -32,7 +32,7 @@ const navigation = [
 
 function Sidebar() {
   return (
-    <aside className="hidden min-h-screen w-64 shrink-0 border-r border-slate-800/80 bg-slate-950 px-5 py-6 md:block">
+    <aside className="hidden min-h-screen w-64 shrink-0 border-r border-[var(--border)] bg-[var(--background)] p-6 transition-colors duration-200 md:block">
       <div className="flex items-center gap-3 px-2">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 font-bold text-slate-950 shadow-lg shadow-emerald-500/10">
           F
@@ -43,7 +43,7 @@ function Sidebar() {
             FinFlow
           </span>
 
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-[var(--text-secondary)]">
             Personal finance
           </p>
         </div>
@@ -60,8 +60,8 @@ function Sidebar() {
               className={({ isActive }) =>
                 `group flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition duration-200 ${
                   isActive
-                    ? "bg-emerald-500/10 text-emerald-400"
-                    : "text-slate-400 hover:bg-slate-900 hover:text-white"
+                     ? "bg-[var(--surface-hover)] text-[var(--text-primary)]"
+                     : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
                 }`
               }
             >
@@ -76,14 +76,14 @@ function Sidebar() {
         })}
       </nav>
 
-      <div className="mt-8 border-t border-slate-800/80 pt-6">
+      <div className="mt-8 border-t border-[var(--border)] pt-6">
         <NavLink
           to="/settings"
           className={({ isActive }) =>
             `group flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition duration-200 ${
               isActive
-                ? "bg-emerald-500/10 text-emerald-400"
-                : "text-slate-400 hover:bg-slate-900 hover:text-white"
+                 ? "bg-[var(--surface-hover)] text-[var(--text-primary)]"
+                 : "text-[var(--text-secondary)] hover:bg-[var(--surface)] hover:text-[var(--text-primary)]"
             }`
           }
         >

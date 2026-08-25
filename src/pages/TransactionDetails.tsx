@@ -14,7 +14,7 @@ function TransactionDetails() {
           Transaction Details
         </h1>
 
-        <p className="mt-4 text-slate-400">
+        <p className="mt-4 text-[var(--text-secondary)]">
           Loading transaction...
         </p>
       </div>
@@ -46,7 +46,7 @@ function TransactionDetails() {
           Transaction Not Found
         </h1>
 
-        <p className="mt-4 text-slate-400">
+        <p className="mt-4 text-[var(--text-secondary)]">
           We couldn't find the transaction you're looking for.
         </p>
 
@@ -74,13 +74,13 @@ function TransactionDetails() {
     <div>
       <Link
         to="/transactions"
-        className="text-sm text-slate-400 transition hover:text-white"
+        className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--text-primary)]"
       >
         ← Back to Transactions
       </Link>
 
       <div className="mt-6">
-        <p className="text-sm text-slate-400">
+        <p className="text-sm text-[var(--text-secondary)]">
           Transaction Details
         </p>
 
@@ -89,11 +89,11 @@ function TransactionDetails() {
         </h1>
       </div>
 
-      <section className="mt-8 overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
+      <section className="mt-8 overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)]">
         <div className="p-6 md:p-8">
           <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
             <div>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-[var(--text-muted)]">
                 Amount
               </p>
 
@@ -120,19 +120,19 @@ function TransactionDetails() {
             </span>
           </div>
 
-          <div className="mt-8 border-t border-slate-800 pt-6">
-            <p className="text-sm text-slate-500">
+          <div className="mt-8 border-t border-[var(--border-color)] pt-6">
+            <p className="text-sm text-[var(--text-muted)]">
               Description
             </p>
 
-            <p className="mt-2 leading-6 text-slate-200">
+            <p className="mt-2 leading-6 text-[var(--text-primary)]">
               {transaction.description}
             </p>
           </div>
 
-          <div className="mt-8 grid gap-6 border-t border-slate-800 pt-6 sm:grid-cols-2 md:grid-cols-3">
+          <div className="mt-8 grid gap-6 border-t border-[var(--border-color)] pt-6 sm:grid-cols-2 md:grid-cols-3">
             <div>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-[var(--text-muted)]">
                 Category
               </p>
 
@@ -142,7 +142,7 @@ function TransactionDetails() {
             </div>
 
             <div>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-[var(--text-muted)]">
                 Date
               </p>
 
@@ -152,7 +152,7 @@ function TransactionDetails() {
             </div>
 
             <div>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-[var(--text-muted)]">
                 Transaction ID
               </p>
 

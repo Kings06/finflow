@@ -24,26 +24,26 @@ function FinancialChart() {
 
   if (loading) {
     return (
-      <section className="mt-8 h-[400px] animate-pulse rounded-2xl bg-slate-900" />
+      <section className="mt-8 h-[400px] animate-pulse rounded-2xl bg-[var(--surface)]" />
     )
   }
 
   if (error) {
     return (
-      <section className="mt-8 rounded-2xl bg-red-950/40 p-6 text-red-400">
+      <section className="mt-8 rounded-2xl border border-red-500/20 bg-red-500/10 p-6 text-red-500">
         {error}
       </section>
     )
   }
 
   return (
-    <section className="mt-8 rounded-2xl border border-slate-800 bg-slate-900 p-6 transition duration-200 hover:border-slate-700">
+    <section className="mt-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 transition duration-200 hover:bg-[var(--surface-hover)]">
       <div className="mb-6">
-        <h2 className="text-xl font-semibold tracking-tight">
+        <h2 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">
           Financial Overview
         </h2>
 
-        <p className="mt-1 text-sm text-slate-400">
+        <p className="mt-1 text-sm text-[var(--text-secondary)]">
           Income and expenses from your recent transactions.
         </p>
       </div>
@@ -60,6 +60,7 @@ function FinancialChart() {
             }}
           >
             <CartesianGrid
+              stroke="var(--border)"
               strokeDasharray="3 3"
               vertical={false}
             />
@@ -72,7 +73,10 @@ function FinancialChart() {
                   day: "numeric",
                 })
               }
-              tick={{ fontSize: 12 }}
+              tick={{
+                fontSize: 12,
+                fill: "var(--text-muted)",
+              }}
               tickLine={false}
               axisLine={false}
             />
@@ -81,7 +85,10 @@ function FinancialChart() {
               tickFormatter={(value) =>
                 formatCurrency(Number(value))
               }
-              tick={{ fontSize: 12 }}
+              tick={{
+                fontSize: 12,
+                fill: "var(--text-muted)",
+              }}
               tickLine={false}
               axisLine={false}
               width={70}
@@ -91,6 +98,18 @@ function FinancialChart() {
               formatter={(value) =>
                 formatCurrency(Number(value))
               }
+              contentStyle={{
+                backgroundColor: "var(--surface)",
+                border: "1px solid var(--border)",
+                borderRadius: "12px",
+                color: "var(--text-primary)",
+              }}
+              labelStyle={{
+                color: "var(--text-secondary)",
+              }}
+              itemStyle={{
+                color: "var(--text-primary)",
+              }}
             />
 
             <Bar
