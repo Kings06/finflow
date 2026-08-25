@@ -125,7 +125,7 @@ function Analytics() {
       </header>
 
       {/* Analytics Cards */}
-      <section className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <section className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {metrics.map((metric) => (
           <div
             key={metric.title}

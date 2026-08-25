@@ -5,6 +5,7 @@ import MobileNav from "./components/MobileNav"
 import Sidebar from "./components/Sidebar"
 import Dashboard from "./pages/Dashboard"
 import Transactions from "./pages/Transactions"
+import AddTransaction from "./pages/AddTransaction"
 import TransactionDetails from "./pages/TransactionDetails"
 import Analytics from "./pages/Analytics"
 import Accounts from "./pages/Accounts"
@@ -20,7 +21,7 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-[var(--background)] text-[var(--text-primary)] transition-colors duration-200">
+      <div className="min-h-screen bg-(--background) text-(--text-primary) transition-colors duration-200">
         <MobileNav
           isOpen={isMobileNavOpen}
           onToggle={toggleMobileNav}
@@ -36,6 +37,10 @@ function App() {
                 <Route
                   path="/transactions"
                   element={<Transactions />}
+                />
+                <Route
+                  path="/transactions/new"
+                  element={<AddTransaction />}
                 />
                 <Route
                   path="/transactions/:id"

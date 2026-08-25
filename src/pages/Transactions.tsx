@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react"
+import { Link } from "react-router-dom"
 import { useTransactionsContext } from "../context/TransactionsContext"
 import TransactionItem from "../components/TransactionItem"
 import {
@@ -107,15 +108,24 @@ function Transactions() {
 
   return (
     <div>
-      <header>
-        <h1 className="text-3xl font-bold">
-          Transactions
-        </h1>
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+  <div>
+    <h1 className="text-3xl font-bold">
+      Transactions
+    </h1>
 
-        <p className="mt-2 text-[var(--text-secondary)]">
-          View and manage your financial transactions.
-        </p>
-      </header>
+    <p className="mt-2 text-[var(--text-secondary)]">
+      View and manage your financial transactions.
+    </p>
+  </div>
+
+  <Link
+    to="/transactions/new"
+    className="inline-flex items-center justify-center rounded-xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400"
+  >
+    + Add Transaction
+  </Link>
+</header>
 
       <section className="mt-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 transition-colors duration-200">
         <div className="mb-5">

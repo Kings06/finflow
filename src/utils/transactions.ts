@@ -29,6 +29,10 @@ export function sortTransactions(
       return b.amount - a.amount
     }
 
-    return a.amount - b.amount
+    if (sort === "lowest") {
+      return a.amount - b.amount
+    }
+
+    return 0
   })
 }

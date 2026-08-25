@@ -5,7 +5,21 @@ type TransactionsContextValue = {
   transactions: Transaction[]
   loading: boolean
   error: string | null
+
   refreshTransactions: () => Promise<void>
+
+  addTransaction: (
+    transaction: Omit<Transaction, "id">,
+  ) => Promise<Transaction>
+
+  editTransaction: (
+    id: number,
+    transaction: Omit<Transaction, "id">,
+  ) => Promise<Transaction>
+
+  removeTransaction: (
+    id: number,
+  ) => Promise<void>
 }
 
 const TransactionsContext =
