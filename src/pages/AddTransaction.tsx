@@ -10,6 +10,7 @@ const categories = [
   "Shopping",
   "Bills",
   "Entertainment",
+  "Others",
 ]
 
 function AddTransaction() {

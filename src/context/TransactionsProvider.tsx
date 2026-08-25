@@ -14,6 +14,8 @@ type TransactionsProviderProps = {
   children: React.ReactNode
 }
 
+const STORAGE_KEY = "finflow-transactions"
+
 function TransactionsProvider({
   children,
 }: TransactionsProviderProps) {
@@ -30,9 +32,22 @@ function TransactionsProvider({
       setLoading(true)
       setError(null)
 
+      const storedTransactions =
+        localStorage.getItem(STORAGE_KEY)
+
+      if (storedTransactions) {
+        setTransactions(JSON.parse(storedTransactions))
+        return
+      }
+
       const data = await getTransactions()
 
       setTransactions(data)
+
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(data),
+      )
     } catch {
       setError("Failed to load transactions.")
     } finally {
@@ -50,15 +65,26 @@ function TransactionsProvider({
         const newTransaction =
           await createTransaction(transaction)
 
-        setTransactions((current) => [
-          newTransaction,
-          ...current,
-        ])
+        setTransactions((current) => {
+          const updatedTransactions = [
+            newTransaction,
+            ...current,
+          ]
+
+          localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(updatedTransactions),
+          )
+
+          return updatedTransactions
+        })
 
         return newTransaction
       } catch {
         setError("Failed to create transaction.")
-        throw new Error("Failed to create transaction.")
+        throw new Error(
+          "Failed to create transaction.",
+        )
       }
     },
     [],
@@ -75,18 +101,28 @@ function TransactionsProvider({
         const updatedTransaction =
           await updateTransaction(id, transaction)
 
-        setTransactions((current) =>
-          current.map((item) =>
-            item.id === id
-              ? updatedTransaction
-              : item,
-          ),
-        )
+        setTransactions((current) => {
+          const updatedTransactions = current.map(
+            (item) =>
+              item.id === id
+                ? updatedTransaction
+                : item,
+          )
+
+          localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(updatedTransactions),
+          )
+
+          return updatedTransactions
+        })
 
         return updatedTransaction
       } catch {
         setError("Failed to update transaction.")
-        throw new Error("Failed to update transaction.")
+        throw new Error(
+          "Failed to update transaction.",
+        )
       }
     },
     [],
@@ -99,12 +135,24 @@ function TransactionsProvider({
 
         await deleteTransaction(id)
 
-        setTransactions((current) =>
-          current.filter((item) => item.id !== id),
-        )
+        setTransactions((current) => {
+          const updatedTransactions =
+            current.filter(
+              (item) => item.id !== id,
+            )
+
+          localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(updatedTransactions),
+          )
+
+          return updatedTransactions
+        })
       } catch {
         setError("Failed to delete transaction.")
-        throw new Error("Failed to delete transaction.")
+        throw new Error(
+          "Failed to delete transaction.",
+        )
       }
     },
     [],

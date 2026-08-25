@@ -8,6 +8,7 @@ const categories = [
   "Shopping",
   "Bills",
   "Entertainment",
+  "Others",
 ]
 
 export function transformPostToTransaction(

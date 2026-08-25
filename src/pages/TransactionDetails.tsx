@@ -11,6 +11,7 @@ const categories = [
   "Shopping",
   "Bills",
   "Entertainment",
+  "Others",
 ]
 
 function TransactionDetails() {
