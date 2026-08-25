@@ -5,8 +5,7 @@ import { buildExpenseBreakdown } from "../utils/expenseBreakdown"
 import FinancialChart from "../components/FinancialChart"
 
 function Analytics() {
-  const { transactions, loading, error } =
-    useTransactionsContext()
+  const { transactions, loading, error } = useTransactionsContext()
 
   if (loading) {
     return (
@@ -61,8 +60,7 @@ function Analytics() {
 
   const summary = calculateFinancialSummary(transactions)
 
-  const expenseBreakdown =
-    buildExpenseBreakdown(transactions)
+  const expenseBreakdown = buildExpenseBreakdown(transactions)
 
   const topExpenseCategory = expenseBreakdown[0]
 
@@ -113,7 +111,6 @@ function Analytics() {
 
   return (
     <div>
-      {/* Page Header */}
       <header>
         <h1 className="text-3xl font-bold text-[var(--text-primary)]">
           Analytics
@@ -124,7 +121,6 @@ function Analytics() {
         </p>
       </header>
 
-      {/* Analytics Cards */}
       <section className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {metrics.map((metric) => (
           <div
@@ -148,8 +144,7 @@ function Analytics() {
         ))}
       </section>
 
-      {/* Expense Breakdown */}
-      <section className="mt-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 transition duration-200 hover:border-[var(--border-hover)]">
+      <section className="mt-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 transition duration-200">
         <div>
           <p className="text-sm font-medium text-emerald-500">
             Spending insights
@@ -160,8 +155,7 @@ function Analytics() {
           </h2>
 
           <p className="mt-1 text-sm text-[var(--text-secondary)]">
-            See how your expenses are distributed across
-            categories.
+            See how your expenses are distributed across categories.
           </p>
         </div>
 
@@ -189,10 +183,7 @@ function Analytics() {
                   <div
                     className="h-full rounded-full bg-emerald-500 transition-all duration-500"
                     style={{
-                      width: `${Math.min(
-                        item.percentage,
-                        100,
-                      )}%`,
+                      width: `${Math.min(item.percentage, 100)}%`,
                     }}
                   />
                 </div>
@@ -205,15 +196,13 @@ function Analytics() {
               </p>
 
               <p className="mt-1 text-sm text-[var(--text-muted)]">
-                Expense insights will appear once you have
-                recorded expenses.
+                Expense insights will appear once you have recorded expenses.
               </p>
             </div>
           )}
         </div>
       </section>
 
-      {/* Financial Chart */}
       <FinancialChart />
     </div>
   )

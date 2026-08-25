@@ -10,6 +10,7 @@ import TransactionDetails from "./pages/TransactionDetails"
 import Analytics from "./pages/Analytics"
 import Accounts from "./pages/Accounts"
 import Settings from "./pages/Settings"
+import PreferencesProvider from "./context/PreferencesContext"
 
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
 
   return (
     <BrowserRouter>
+     <PreferencesProvider>
       <div className="min-h-screen bg-(--background) text-(--text-primary) transition-colors duration-200">
         <MobileNav
           isOpen={isMobileNavOpen}
@@ -63,6 +65,7 @@ function App() {
           </main>
         </div>
       </div>
+     </PreferencesProvider>
     </BrowserRouter>
   )
 }

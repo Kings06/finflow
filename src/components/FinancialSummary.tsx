@@ -8,7 +8,12 @@ function FinancialSummary() {
 
   if (loading) {
     return (
-      <section className="mt-6 h-32 animate-pulse rounded-2xl bg-[var(--surface)]" />
+      <section
+        className="mt-6 h-64 animate-pulse rounded-2xl"
+        style={{
+          backgroundColor: "var(--surface)",
+        }}
+      />
     )
   }
 
@@ -23,56 +28,117 @@ function FinancialSummary() {
       ? (summary.totalBalance / summary.totalIncome) * 100
       : 0
 
+  const balanceIsPositive =
+    summary.totalBalance >= 0
+
   return (
-    <section className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 transition duration-200 hover:bg-[var(--surface-hover)]">
-      <div className="flex flex-col gap-6">
+    <section
+      className="mt-6 rounded-2xl border p-6 transition duration-200"
+      style={{
+        borderColor: "var(--border)",
+        backgroundColor: "var(--surface)",
+      }}
+      onMouseEnter={(event) => {
+        event.currentTarget.style.backgroundColor =
+          "var(--surface-hover)"
+      }}
+      onMouseLeave={(event) => {
+        event.currentTarget.style.backgroundColor =
+          "var(--surface)"
+      }}
+    >
+      <div>
+        <p
+          className="text-sm font-medium"
+          style={{
+            color: "var(--text-secondary)",
+          }}
+        >
+          Financial Snapshot
+        </p>
+
+        <h2
+          className="mt-2 text-2xl font-bold tracking-tight"
+          style={{
+            color: "var(--text-primary)",
+          }}
+        >
+          You're keeping{" "}
+          <span
+            className={
+              balanceIsPositive
+                ? "text-emerald-500"
+                : "text-red-500"
+            }
+          >
+            {formatCurrency(summary.totalBalance)}
+          </span>
+        </h2>
+
+        <p
+          className="mt-2 text-sm"
+          style={{
+            color: "var(--text-muted)",
+          }}
+        >
+          Based on your current income and expenses.
+        </p>
+      </div>
+
+      <div
+        className="mt-6 grid gap-5 border-t pt-5 sm:grid-cols-3"
+        style={{
+          borderColor: "var(--border)",
+        }}
+      >
         <div>
-          <p className="text-sm font-medium text-[var(--text-secondary)]">
-            Financial Snapshot
+          <p
+            className="text-sm"
+            style={{
+              color: "var(--text-muted)",
+            }}
+          >
+            Income
           </p>
 
-          <h2 className="mt-2 text-2xl font-bold tracking-tight text-[var(--text-primary)]">
-            You're keeping{" "}
-            <span className="text-emerald-500">
-              {formatCurrency(summary.totalBalance)}
-            </span>
-          </h2>
-
-          <p className="mt-2 text-sm text-[var(--text-muted)]">
-            Based on your current income and expenses.
+          <p className="mt-1 font-semibold text-emerald-500">
+            {formatCurrency(summary.totalIncome)}
           </p>
         </div>
 
-        <div className="grid gap-5 border-t border-[var(--border)] pt-5 sm:grid-cols-3">
-          <div>
-            <p className="text-sm text-[var(--text-muted)]">
-              Income
-            </p>
+        <div>
+          <p
+            className="text-sm"
+            style={{
+              color: "var(--text-muted)",
+            }}
+          >
+            Expenses
+          </p>
 
-            <p className="mt-1 font-semibold text-emerald-500">
-              {formatCurrency(summary.totalIncome)}
-            </p>
-          </div>
+          <p className="mt-1 font-semibold text-red-500">
+            {formatCurrency(summary.totalExpenses)}
+          </p>
+        </div>
 
-          <div>
-            <p className="text-sm text-[var(--text-muted)]">
-              Expenses
-            </p>
+        <div>
+          <p
+            className="text-sm"
+            style={{
+              color: "var(--text-muted)",
+            }}
+          >
+            Retained
+          </p>
 
-            <p className="mt-1 font-semibold text-red-500">
-              {formatCurrency(summary.totalExpenses)}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-sm text-[var(--text-muted)]">
-              Retained
-            </p>
-
-            <p className="mt-1 font-semibold text-[var(--text-primary)]">
-              {savingsRate.toFixed(1)}%
-            </p>
-          </div>
+          <p
+            className="mt-1 font-semibold"
+            style={{
+              color: "var(--text-primary)",
+            }}
+          >
+            {savingsRate.toFixed(1)}%
+          </p>
         </div>
       </div>
     </section>

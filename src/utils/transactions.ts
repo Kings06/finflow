@@ -36,3 +36,23 @@ export function sortTransactions(
     return 0
   })
 }
+
+export function calculateTransactionTotals(
+  transactions: Transaction[],
+) {
+  return transactions.reduce(
+    (totals, transaction) => {
+      if (transaction.type === "income") {
+        totals.income += transaction.amount
+      } else {
+        totals.expenses += transaction.amount
+      }
+
+      return totals
+    },
+    {
+      income: 0,
+      expenses: 0,
+    },
+  )
+}
