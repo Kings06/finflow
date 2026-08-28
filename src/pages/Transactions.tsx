@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 import { useTransactionsContext } from "../context/TransactionsContext"
 import TransactionItem from "../components/TransactionItem"
 import {
+  calculateTransactionTotals,
   sortTransactions,
   type TransactionSort,
 } from "../utils/transactions"
@@ -59,23 +60,11 @@ function Transactions() {
     sort,
   ])
 
-  const transactionTotals = useMemo(() => {
-    return filteredTransactions.reduce(
-      (totals, transaction) => {
-        if (transaction.type === "income") {
-          totals.income += transaction.amount
-        } else {
-          totals.expenses += transaction.amount
-        }
-
-        return totals
-      },
-      {
-        income: 0,
-        expenses: 0,
-      },
-    )
-  }, [filteredTransactions])
+  
+  const transactionTotals = useMemo(
+  () => calculateTransactionTotals(filteredTransactions),
+  [filteredTransactions],
+)
 
   const netAmount =
     transactionTotals.income -
