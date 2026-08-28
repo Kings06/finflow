@@ -2,6 +2,7 @@ import Header from "../components/Header"
 import SummaryCards from "../components/SummaryCards"
 import FinancialSummary from "../components/FinancialSummary"
 import FinancialChart from "../components/FinancialChart"
+import SpendingInsights from "../components/SpendingInsights"
 import TransactionList from "../components/TransactionList"
 
 function Dashboard() {
@@ -20,6 +21,8 @@ function Dashboard() {
           <FinancialSummary />
         </div>
       </div>
+
+      <SpendingInsights />
 
       <TransactionList />
     </div>
