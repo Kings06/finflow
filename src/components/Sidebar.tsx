@@ -32,7 +32,7 @@ const navigation = [
 
 function Sidebar() {
   return (
-    <aside className="hidden min-h-screen w-64 shrink-0 border-r border-[var(--border)] bg-[var(--background)] p-6 transition-colors duration-200 md:block">
+    <aside className="sticky top-0 hidden h-screen w-64 shrink-0 self-start border-r border-[var(--border)] bg-[var(--background)] p-6 transition-colors duration-200 md:block">
       <div className="flex items-center gap-3 px-2">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 font-bold text-slate-950 shadow-lg shadow-emerald-500/10">
           F

@@ -146,125 +146,164 @@ function Transactions() {
       </header>
 
       {/* Filters */}
-      <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div className="mb-5">
-          <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
-            Find a transaction
-          </h2>
+     <section
+  className="mt-8 rounded-2xl border p-6 shadow-sm"
+  style={{
+    borderColor: "var(--border)",
+    backgroundColor: "var(--surface)",
+  }}
+>
+  <div className="mb-5">
+    <h2
+      className="text-sm font-semibold"
+      style={{ color: "var(--text-primary)" }}
+    >
+      Find a transaction
+    </h2>
 
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Search, filter, or sort your financial activity.
-          </p>
-        </div>
+    <p
+      className="mt-1 text-sm"
+      style={{ color: "var(--text-secondary)" }}
+    >
+      Search, filter, or sort your financial activity.
+    </p>
+  </div>
 
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <input
-            type="text"
-            placeholder="Search transactions..."
-            value={search}
-            onChange={(event) =>
-              setSearch(event.target.value)
-            }
-            className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500"
-          />
+  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <input
+      type="text"
+      placeholder="Search transactions..."
+      value={search}
+      onChange={(event) => setSearch(event.target.value)}
+      className="rounded-xl border px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
+      style={{
+        borderColor: "var(--border)",
+        backgroundColor: "var(--surface-hover)",
+        color: "var(--text-primary)",
+      }}
+    />
 
-          <select
-            value={sort}
-            onChange={(event) =>
-              setSort(
-                event.target.value as TransactionSort,
-              )
-            }
-            className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
-          >
-            <option value="newest">
-              Newest first
-            </option>
+    <select
+      value={sort}
+      onChange={(event) =>
+        setSort(event.target.value as TransactionSort)
+      }
+      className="rounded-xl border px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
+      style={{
+        borderColor: "var(--border)",
+        backgroundColor: "var(--surface-hover)",
+        color: "var(--text-primary)",
+      }}
+    >
+      <option value="newest">Newest first</option>
+      <option value="oldest">Oldest first</option>
+      <option value="highest">Highest amount</option>
+      <option value="lowest">Lowest amount</option>
+    </select>
 
-            <option value="oldest">
-              Oldest first
-            </option>
+    <select
+      value={typeFilter}
+      onChange={(event) => setTypeFilter(event.target.value)}
+      className="rounded-xl border px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
+      style={{
+        borderColor: "var(--border)",
+        backgroundColor: "var(--surface-hover)",
+        color: "var(--text-primary)",
+      }}
+    >
+      <option value="all">All Types</option>
+      <option value="income">Income</option>
+      <option value="expense">Expenses</option>
+    </select>
 
-            <option value="highest">
-              Highest amount
-            </option>
-
-            <option value="lowest">
-              Lowest amount
-            </option>
-          </select>
-
-          <select
-            value={typeFilter}
-            onChange={(event) =>
-              setTypeFilter(event.target.value)
-            }
-            className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
-          >
-            <option value="all">All Types</option>
-            <option value="income">Income</option>
-            <option value="expense">Expenses</option>
-          </select>
-
-          <select
-            value={categoryFilter}
-            onChange={(event) =>
-              setCategoryFilter(event.target.value)
-            }
-            className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
-          >
-            {categories.map((category) => (
-              <option
-                key={category}
-                value={category}
-              >
-                {category === "all"
-                  ? "All Categories"
-                  : category}
-              </option>
-            ))}
-          </select>
-        </div>
-      </section>
+    <select
+      value={categoryFilter}
+      onChange={(event) =>
+        setCategoryFilter(event.target.value)
+      }
+      className="rounded-xl border px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
+      style={{
+        borderColor: "var(--border)",
+        backgroundColor: "var(--surface-hover)",
+        color: "var(--text-primary)",
+      }}
+    >
+      {categories.map((category) => (
+        <option key={category} value={category}>
+          {category === "all"
+            ? "All Categories"
+            : category}
+        </option>
+      ))}
+    </select>
+  </div>
+</section>
 
       {/* Filtered totals */}
       <section className="mt-6 grid gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Filtered Income
-          </p>
+  <div
+    className="rounded-2xl border p-5 shadow-sm"
+    style={{
+      borderColor: "var(--border)",
+      backgroundColor: "var(--surface)",
+    }}
+  >
+    <p
+      className="text-sm"
+      style={{ color: "var(--text-secondary)" }}
+    >
+      Filtered Income
+    </p>
 
-          <p className="mt-2 text-2xl font-bold text-emerald-500">
-            {formatCurrency(transactionTotals.income)}
-          </p>
-        </div>
+    <p className="mt-2 text-2xl font-bold text-emerald-500">
+      {formatCurrency(transactionTotals.income)}
+    </p>
+  </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Filtered Expenses
-          </p>
+  <div
+    className="rounded-2xl border p-5 shadow-sm"
+    style={{
+      borderColor: "var(--border)",
+      backgroundColor: "var(--surface)",
+    }}
+  >
+    <p
+      className="text-sm"
+      style={{ color: "var(--text-secondary)" }}
+    >
+      Filtered Expenses
+    </p>
 
-          <p className="mt-2 text-2xl font-bold text-red-500">
-            {formatCurrency(transactionTotals.expenses)}
-          </p>
-        </div>
+    <p className="mt-2 text-2xl font-bold text-red-500">
+      {formatCurrency(transactionTotals.expenses)}
+    </p>
+  </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Net Amount
-          </p>
+  <div
+    className="rounded-2xl border p-5 shadow-sm"
+    style={{
+      borderColor: "var(--border)",
+      backgroundColor: "var(--surface)",
+    }}
+  >
+    <p
+      className="text-sm"
+      style={{ color: "var(--text-secondary)" }}
+    >
+      Net Amount
+    </p>
 
-          <p
-            className={`mt-2 text-2xl font-bold ${
-              netAmount >= 0
-                ? "text-emerald-500"
-                : "text-red-500"
-            }`}
-          >
-            {formatCurrency(netAmount)}
-          </p>
-        </div>
-      </section>
+    <p
+      className={`mt-2 text-2xl font-bold ${
+        netAmount >= 0
+          ? "text-emerald-500"
+          : "text-red-500"
+      }`}
+    >
+      {formatCurrency(netAmount)}
+    </p>
+  </div>
+</section>
 
       {/* Results count */}
       <div className="mt-6 flex min-h-6 items-center justify-between">

@@ -17,11 +17,21 @@ function SpendingInsights() {
   return (
     <section className="mt-10">
       <div className="mb-5">
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
+        <h2
+          className="text-xl font-semibold"
+          style={{
+            color: "var(--text-primary)",
+          }}
+        >
           Spending Insights
         </h2>
 
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+        <p
+          className="mt-1 text-sm"
+          style={{
+            color: "var(--text-secondary)",
+          }}
+        >
           A quick look at what your financial activity is telling you.
         </p>
       </div>
@@ -31,23 +41,25 @@ function SpendingInsights() {
           const styles = {
             positive: {
               container:
-                "border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-950/20",
+                "border-emerald-500/20 bg-emerald-500/5",
               badge:
-                "bg-emerald-100 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-400",
+                "bg-emerald-500/10 text-emerald-500",
               icon: "✓",
             },
+
             warning: {
               container:
-                "border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/20",
+                "border-red-500/20 bg-red-500/5",
               badge:
-                "bg-red-100 text-red-700 dark:bg-red-400/10 dark:text-red-400",
+                "bg-red-500/10 text-red-500",
               icon: "!",
             },
+
             info: {
               container:
-                "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900",
+                "border-[var(--border)] bg-[var(--surface)]",
               badge:
-                "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
+                "bg-[var(--surface-hover)] text-[var(--text-secondary)]",
               icon: "i",
             },
           }
@@ -57,7 +69,7 @@ function SpendingInsights() {
           return (
             <article
               key={`${insight.title}-${index}`}
-              className={`rounded-2xl border p-5 shadow-sm transition-colors duration-200 ${style.container}`}
+              className={`rounded-2xl border p-5 shadow-sm transition duration-200 hover:border-emerald-500/30 ${style.container}`}
             >
               <div className="flex items-start gap-4">
                 <span
@@ -66,12 +78,22 @@ function SpendingInsights() {
                   {style.icon}
                 </span>
 
-                <div>
-                  <h3 className="font-semibold text-slate-900 dark:text-white">
+                <div className="min-w-0">
+                  <h3
+                    className="font-semibold"
+                    style={{
+                      color: "var(--text-primary)",
+                    }}
+                  >
                     {insight.title}
                   </h3>
 
-                  <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
+                  <p
+                    className="mt-2 text-sm leading-6"
+                    style={{
+                      color: "var(--text-secondary)",
+                    }}
+                  >
                     {insight.message}
                   </p>
                 </div>
