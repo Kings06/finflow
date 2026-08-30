@@ -1,75 +1,150 @@
-# React + TypeScript + Vite
+# FinFlow 💰
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+### A modern personal finance dashboard built with React, TypeScript, and Tailwind CSS.
 
-Currently, two official plugins are available:
+FinFlow is a personal finance management dashboard designed to help users understand and manage their financial activity through accounts, transactions, bills, analytics, insights, and financial forecasting.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+The project focuses on building a realistic frontend application with reusable components, structured application state, API integration, data visualization, responsive layouts, and type-safe development.
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## ✨ Features
 
-## Expanding the ESLint configuration
+### 📊 Financial Dashboard
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Overview of financial activity
+- Income and expense summaries
+- Financial status indicators
+- Spending insights
+- Safe-to-spend information
+- Cash flow forecasting
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 💳 Transaction Management
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- View transactions
+- Add transactions
+- View transaction details
+- Organize transaction data
+- Transaction-based financial summaries
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 🏦 Account Management
 
-```
+- View financial accounts
+- Add new accounts
+- Edit account information
+- View individual account details
+- Manage account-related data
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 📅 Bills & Recurring Expenses
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- Track bills
+- Manage recurring expenses
+- Monitor upcoming financial obligations
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 📈 Analytics & Insights
 
-```
+- Financial charts and visualizations
+- Spending breakdowns
+- Financial insights
+- Cash flow analysis
+- Forecasting
+
+### ⚙️ User Preferences
+
+- Application settings
+- Theme preferences
+- Responsive navigation
+- Mobile-friendly interface
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+
+- **React 19**
+- **TypeScript**
+- **Tailwind CSS**
+- **React Router**
+- **Recharts**
+- **Lucide React**
+
+### Data & API
+
+- **Axios**
+- REST API integration
+- Data transformation utilities
+
+### Development Tools
+
+- **Vite**
+- **ESLint**
+- **Git**
+- **GitHub**
+
+---
+
+## 🏗️ Project Structure
+
+```text
+src/
+├── api/
+│   ├── client.ts
+│   ├── posts.ts
+│   ├── transactions.ts
+│   └── transformers.ts
+│
+├── components/
+│   ├── CashFlowForecast.tsx
+│   ├── FinancialChart.tsx
+│   ├── FinancialInsights.tsx
+│   ├── FinancialSummary.tsx
+│   ├── Header.tsx
+│   ├── MobileNav.tsx
+│   ├── RecurringExpenses.tsx
+│   ├── SafeToSpendCard.tsx
+│   ├── Sidebar.tsx
+│   ├── SpendingInsights.tsx
+│   ├── SummaryCards.tsx
+│   ├── TransactionItem.tsx
+│   └── TransactionList.tsx
+│
+├── context/
+│   ├── AccountsContext.tsx
+│   ├── BillsContext.tsx
+│   ├── PreferencesContext.tsx
+│   ├── ThemeContext.tsx
+│   ├── TransactionsContext.tsx
+│   └── TransactionsProvider.tsx
+│
+├── pages/
+│   ├── AccountDetails.tsx
+│   ├── Accounts.tsx
+│   ├── AddAccount.tsx
+│   ├── AddTransaction.tsx
+│   ├── Analytics.tsx
+│   ├── Bills.tsx
+│   ├── Dashboard.tsx
+│   ├── EditAccount.tsx
+│   ├── Settings.tsx
+│   ├── TransactionDetails.tsx
+│   └── Transactions.tsx
+│
+├── types/
+│   ├── account.ts
+│   ├── api.ts
+│   ├── bill.ts
+│   └── transaction.ts
+│
+└── utils/
+    ├── cashFlow.ts
+    ├── chart.ts
+    ├── currency.ts
+    ├── expenseBreakdown.ts
+    ├── financial.ts
+    ├── financialStatus.ts
+    ├── forecast.ts
+    ├── insights.ts
+    ├── recurring.ts
+    ├── safeToSpend.ts
+    └── transactions.ts
