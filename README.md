@@ -114,7 +114,6 @@ The project focuses on building a realistic frontend application with reusable c
 
 ## 🏗️ Project Structure
 
-```text
 src/
 ├── api/
 │   ├── client.ts
@@ -177,14 +176,13 @@ src/
     ├── safeToSpend.ts
     └── transactions.ts
 
-    ---
+ ---
 
 ## 🚀 Getting Started
 
 ### Clone the repository
 
 git clone https://github.com/Kings06/finflow.git
-
 cd finflow
 
 ### Install dependencies
