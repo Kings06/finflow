@@ -184,6 +184,7 @@ src/
 ### Clone the repository
 
 git clone https://github.com/Kings06/finflow.git
+
 cd finflow
 
 ### Install dependencies
