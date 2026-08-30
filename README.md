@@ -114,6 +114,7 @@ The project focuses on building a realistic frontend application with reusable c
 
 ## 🏗️ Project Structure
 
+```text
 src/
 ├── api/
 │   ├── client.ts
@@ -176,13 +177,26 @@ src/
     ├── safeToSpend.ts
     └── transactions.ts
 
- ---
+```
+---
 
 ## 🚀 Getting Started
 
+### Prerequisites
+
+Make sure you have:
+
+- Node.js
+- npm
+
+installed on your machine.
+
 ### Clone the repository
 
+```bash
+
 git clone https://github.com/Kings06/finflow.git
+
 cd finflow
 
 ### Install dependencies
@@ -200,6 +214,8 @@ npm run build
 ### Run lint
 
 npm run lint
+
+```
 
 ---
 
@@ -221,7 +237,7 @@ FinFlow supports both dark and light themes, allowing users to switch between vi
 
 FinFlow was built as a practical frontend project focused on applying modern frontend development concepts to a realistic financial application.
 
-Key areas explored include:
+### Key areas explored include:
 
 - Component-based architecture
 - Type-safe development with TypeScript
@@ -239,11 +255,11 @@ Key areas explored include:
 
 ## 📌 Project Status
 
-Active development.
+### Active development.
 
 FinFlow is currently a frontend-focused project.
 
-Future improvements may include:
+### Future improvements may include:
 
 - Backend persistence
 - User authentication
@@ -256,10 +272,18 @@ Future improvements may include:
 
 ## 👨🏽‍💻 Author
 
-Ebuka Kings
+### Ebuka Kings
 
 Frontend Developer focused on building modern, responsive web applications with React, TypeScript, and JavaScript.
 
-Portfolio: https://devbykings-portfolio.vercel.app
-LinkedIn: https://linkedin.com/in/ebuka-kings
-GitHub: https://github.com/Kings06
+### Portfolio: 
+
+https://devbykings-portfolio.vercel.app
+
+### LinkedIn: 
+
+https://linkedin.com/in/ebuka-kings
+
+### GitHub: 
+
+https://github.com/Kings06
