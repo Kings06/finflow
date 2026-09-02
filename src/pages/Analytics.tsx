@@ -6,18 +6,15 @@ import {
   CalendarDays,
   Lightbulb,
   PiggyBank,
+  TrendingDown,
   TrendingUp,
   Wallet,
 } from "lucide-react"
 
 import FinancialChart from "../components/FinancialChart"
 import { useTransactionsContext } from "../context/TransactionsContext"
-import {
-  calculateFinancialSummary,
-} from "../utils/financial"
-import {
-  buildExpenseBreakdown,
-} from "../utils/expenseBreakdown"
+import { calculateFinancialSummary } from "../utils/financial"
+import { buildExpenseBreakdown } from "../utils/expenseBreakdown"
 import { formatCurrency } from "../utils/currency"
 
 type AnalyticsPeriod =
@@ -26,6 +23,12 @@ type AnalyticsPeriod =
   | "3months"
   | "year"
   | "all"
+
+type ComparisonResult = {
+  current: number
+  previous: number
+  percentageChange: number
+}
 
 const periodOptions: {
   value: AnalyticsPeriod
@@ -72,6 +75,185 @@ function getPeriodStart(period: AnalyticsPeriod) {
   return null
 }
 
+function getComparisonDates(
+  period: AnalyticsPeriod,
+) {
+  const now = new Date()
+
+  if (period === "month") {
+  const previousStart = new Date(
+    now.getFullYear(),
+    now.getMonth() - 1,
+    1,
+  )
+
+  const previousEnd = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    0,
+  )
+
+  return {
+    previousStart,
+    previousEnd,
+  }
+}
+
+  if (period === "30days") {
+    const currentStart = new Date(now)
+    currentStart.setDate(
+      currentStart.getDate() - 30,
+    )
+
+    const previousStart = new Date(now)
+    previousStart.setDate(
+      previousStart.getDate() - 60,
+    )
+
+    return {
+      previousStart,
+      previousEnd: currentStart,
+    }
+  }
+
+  if (period === "3months") {
+    const currentStart = new Date(now)
+    currentStart.setMonth(
+      currentStart.getMonth() - 3,
+    )
+
+    const previousStart = new Date(now)
+    previousStart.setMonth(
+      previousStart.getMonth() - 6,
+    )
+
+    return {
+      previousStart,
+      previousEnd: currentStart,
+    }
+  }
+
+  if (period === "year") {
+    const previousStart = new Date(
+      now.getFullYear() - 1,
+      0,
+      1,
+    )
+
+    const previousEnd = new Date(
+      now.getFullYear() - 1,
+      11,
+      31,
+    )
+
+    return {
+      previousStart,
+      previousEnd,
+    }
+  }
+
+  return null
+}
+
+function calculatePercentageChange(
+  current: number,
+  previous: number,
+) {
+  if (previous === 0) {
+    return current === 0 ? 0 : 100
+  }
+
+  return (
+    ((current - previous) /
+      Math.abs(previous)) *
+    100
+  )
+}
+
+function getComparisonLabel(
+  percentageChange: number,
+) {
+  if (percentageChange === 0) {
+    return "No change"
+  }
+
+  return `${Math.abs(percentageChange).toFixed(1)}%`
+}
+
+function ComparisonIndicator({
+  comparison,
+  positiveDirection = "up",
+}: {
+  comparison: ComparisonResult
+  positiveDirection?: "up" | "down"
+}) {
+  if (comparison.previous === 0) {
+    if (comparison.current === 0) {
+      return (
+        <span className="text-xs text-[var(--text-muted)]">
+          No change vs previous period
+        </span>
+      )
+    }
+
+    return (
+      <span
+        className={`inline-flex items-center gap-1 text-xs font-medium ${
+          comparison.current > 0
+            ? positiveDirection === "up"
+              ? "text-emerald-600"
+              : "text-red-500"
+            : "text-[var(--text-muted)]"
+        }`}
+      >
+        {positiveDirection === "up" ? (
+          <ArrowUpRight size={14} />
+        ) : (
+          <ArrowDownRight size={14} />
+        )}
+        New activity this period
+      </span>
+    )
+  }
+
+  if (comparison.percentageChange === 0) {
+    return (
+      <span className="text-xs text-[var(--text-muted)]">
+        No change vs previous period
+      </span>
+    )
+  }
+
+  const increased =
+    comparison.percentageChange > 0
+
+  const isPositive =
+    positiveDirection === "up"
+      ? increased
+      : !increased
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1 text-xs font-medium ${
+        isPositive
+          ? "text-emerald-600"
+          : "text-red-500"
+      }`}
+    >
+      {increased ? (
+        <ArrowUpRight size={14} />
+      ) : (
+        <ArrowDownRight size={14} />
+      )}
+
+      {getComparisonLabel(
+        comparison.percentageChange,
+      )}{" "}
+      vs previous period
+    </span>
+  )
+}
+
 function Analytics() {
   const {
     transactions,
@@ -93,8 +275,37 @@ function Analytics() {
 
     return transactions.filter(
       (transaction) =>
-        new Date(transaction.date).getTime() >=
-        startTime,
+        new Date(
+          transaction.date,
+        ).getTime() >= startTime,
+    )
+  }, [transactions, period])
+
+  const previousTransactions = useMemo(() => {
+    const dates = getComparisonDates(period)
+
+    if (!dates) {
+      return []
+    }
+
+    const previousStart =
+      dates.previousStart.getTime()
+
+    const previousEnd =
+      dates.previousEnd.getTime()
+
+    return transactions.filter(
+      (transaction) => {
+        const transactionTime =
+          new Date(
+            transaction.date,
+          ).getTime()
+
+        return (
+          transactionTime >= previousStart &&
+          transactionTime <= previousEnd
+        )
+      },
     )
   }, [transactions, period])
 
@@ -104,6 +315,14 @@ function Analytics() {
         filteredTransactions,
       ),
     [filteredTransactions],
+  )
+
+  const previousSummary = useMemo(
+    () =>
+      calculateFinancialSummary(
+        previousTransactions,
+      ),
+    [previousTransactions],
   )
 
   const expenseBreakdown = useMemo(
@@ -121,10 +340,81 @@ function Analytics() {
         100
       : 0
 
+  const previousSavingsRate =
+    previousSummary.totalIncome > 0
+      ? (previousSummary.totalBalance /
+          previousSummary.totalIncome) *
+        100
+      : 0
+
+  const incomeComparison: ComparisonResult =
+    {
+      current: summary.totalIncome,
+      previous: previousSummary.totalIncome,
+      percentageChange:
+        calculatePercentageChange(
+          summary.totalIncome,
+          previousSummary.totalIncome,
+        ),
+    }
+
+  const expenseComparison: ComparisonResult =
+    {
+      current: summary.totalExpenses,
+      previous: previousSummary.totalExpenses,
+      percentageChange:
+        calculatePercentageChange(
+          summary.totalExpenses,
+          previousSummary.totalExpenses,
+        ),
+    }
+
+  const balanceComparison: ComparisonResult =
+    {
+      current: summary.totalBalance,
+      previous: previousSummary.totalBalance,
+      percentageChange:
+        calculatePercentageChange(
+          summary.totalBalance,
+          previousSummary.totalBalance,
+        ),
+    }
+
+  const savingsComparison: ComparisonResult =
+    {
+      current: savingsRate,
+      previous: previousSavingsRate,
+      percentageChange:
+        calculatePercentageChange(
+          savingsRate,
+          previousSavingsRate,
+        ),
+    }
+
   const topExpense =
     expenseBreakdown.length > 0
       ? expenseBreakdown[0]
       : null
+
+  const highestExpense = useMemo(() => {
+    const expenses =
+      filteredTransactions.filter(
+        (transaction) =>
+          transaction.type === "expense",
+      )
+
+    if (expenses.length === 0) {
+      return null
+    }
+
+    return expenses.reduce(
+      (highest, transaction) =>
+        transaction.amount >
+        highest.amount
+          ? transaction
+          : highest,
+    )
+  }, [filteredTransactions])
 
   const averageTransaction =
     filteredTransactions.length > 0
@@ -132,6 +422,9 @@ function Analytics() {
           summary.totalExpenses) /
         filteredTransactions.length
       : 0
+
+  const expenseChangeIsGood =
+    expenseComparison.percentageChange < 0
 
   if (loading) {
     return (
@@ -190,7 +483,6 @@ function Analytics() {
           </p>
         </div>
 
-        {/* Period selector */}
         <div className="flex items-center gap-2">
           <CalendarDays
             size={18}
@@ -221,6 +513,7 @@ function Analytics() {
 
       {/* Summary cards */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {/* Income */}
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
           <div className="flex items-center justify-between">
             <span className="text-sm text-[var(--text-secondary)]">
@@ -238,11 +531,15 @@ function Analytics() {
             )}
           </p>
 
-          <p className="mt-1 text-xs text-[var(--text-muted)]">
-            Money received
-          </p>
+          <div className="mt-2">
+            <ComparisonIndicator
+              comparison={incomeComparison}
+              positiveDirection="up"
+            />
+          </div>
         </div>
 
+        {/* Expenses */}
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
           <div className="flex items-center justify-between">
             <span className="text-sm text-[var(--text-secondary)]">
@@ -260,11 +557,15 @@ function Analytics() {
             )}
           </p>
 
-          <p className="mt-1 text-xs text-[var(--text-muted)]">
-            Money spent
-          </p>
+          <div className="mt-2">
+            <ComparisonIndicator
+              comparison={expenseComparison}
+              positiveDirection="down"
+            />
+          </div>
         </div>
 
+        {/* Net balance */}
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
           <div className="flex items-center justify-between">
             <span className="text-sm text-[var(--text-secondary)]">
@@ -288,11 +589,15 @@ function Analytics() {
             )}
           </p>
 
-          <p className="mt-1 text-xs text-[var(--text-muted)]">
-            Income minus expenses
-          </p>
+          <div className="mt-2">
+            <ComparisonIndicator
+              comparison={balanceComparison}
+              positiveDirection="up"
+            />
+          </div>
         </div>
 
+        {/* Savings */}
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
           <div className="flex items-center justify-between">
             <span className="text-sm text-[var(--text-secondary)]">
@@ -308,13 +613,16 @@ function Analytics() {
             {savingsRate.toFixed(1)}%
           </p>
 
-          <p className="mt-1 text-xs text-[var(--text-muted)]">
-            Of your income retained
-          </p>
+          <div className="mt-2">
+            <ComparisonIndicator
+              comparison={savingsComparison}
+              positiveDirection="up"
+            />
+          </div>
         </div>
       </div>
 
-      {/* Chart + breakdown */}
+      {/* Empty state */}
       {filteredTransactions.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)] p-10 text-center">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
@@ -333,10 +641,12 @@ function Analytics() {
         </div>
       ) : (
         <>
+          {/* Financial chart */}
           <FinancialChart
             transactions={filteredTransactions}
           />
 
+          {/* Breakdown + insights */}
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Expense breakdown */}
             <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
@@ -370,12 +680,12 @@ function Analytics() {
                       <div
                         key={expense.category}
                       >
-                        <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center justify-between gap-4 text-sm">
                           <span className="font-medium text-[var(--text-primary)]">
                             {expense.category}
                           </span>
 
-                          <span className="text-[var(--text-secondary)]">
+                          <span className="shrink-0 text-[var(--text-secondary)]">
                             {formatCurrency(
                               expense.amount,
                             )}
@@ -425,54 +735,174 @@ function Analytics() {
               </div>
 
               <div className="mt-6 space-y-3">
+                {/* Income insight */}
                 <div className="rounded-xl bg-[var(--surface-hover)] p-4">
-                  <p className="text-sm font-medium text-[var(--text-primary)]">
-                    {summary.totalBalance >=
-                    0
-                      ? "You're spending within your income."
-                      : "Your expenses are higher than your income."}
-                  </p>
+                  <div className="flex items-start gap-3">
+                    {incomeComparison.percentageChange >=
+                    0 ? (
+                      <TrendingUp
+                        size={18}
+                        className="mt-0.5 shrink-0 text-emerald-600"
+                      />
+                    ) : (
+                      <TrendingDown
+                        size={18}
+                        className="mt-0.5 shrink-0 text-red-500"
+                      />
+                    )}
 
-                  <p className="mt-1 text-xs text-[var(--text-secondary)]">
-                    Your net position for this period
-                    is{" "}
-                    <strong>
-                      {formatCurrency(
-                        Math.abs(
-                          summary.totalBalance,
-                        ),
-                      )}
-                    </strong>
-                    .
-                  </p>
+                    <div>
+                      <p className="text-sm font-medium text-[var(--text-primary)]">
+                        {incomeComparison.percentageChange >=
+                        0
+                          ? "Income improved"
+                          : "Income declined"}
+                      </p>
+
+                      <p className="mt-1 text-xs leading-5 text-[var(--text-secondary)]">
+                        {incomeComparison.percentageChange ===
+                        0
+                          ? "Your income is unchanged compared with the previous period."
+                          : `Your income is ${getComparisonLabel(
+                              incomeComparison.percentageChange,
+                            )} ${
+                              incomeComparison.percentageChange >
+                              0
+                                ? "higher"
+                                : "lower"
+                            } than the previous period.`}
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
+                {/* Expense insight */}
+                <div className="rounded-xl bg-[var(--surface-hover)] p-4">
+                  <div className="flex items-start gap-3">
+                    {expenseChangeIsGood ? (
+                      <TrendingDown
+                        size={18}
+                        className="mt-0.5 shrink-0 text-emerald-600"
+                      />
+                    ) : (
+                      <TrendingUp
+                        size={18}
+                        className="mt-0.5 shrink-0 text-red-500"
+                      />
+                    )}
+
+                    <div>
+                      <p className="text-sm font-medium text-[var(--text-primary)]">
+                        {expenseChangeIsGood
+                          ? "Spending decreased"
+                          : "Spending increased"}
+                      </p>
+
+                      <p className="mt-1 text-xs leading-5 text-[var(--text-secondary)]">
+                        {expenseComparison.percentageChange ===
+                        0
+                          ? "Your spending is unchanged compared with the previous period."
+                          : `Your expenses are ${getComparisonLabel(
+                              expenseComparison.percentageChange,
+                            )} ${
+                              expenseComparison.percentageChange >
+                              0
+                                ? "higher"
+                                : "lower"
+                            } than the previous period.`}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Savings insight */}
+                <div className="rounded-xl bg-[var(--surface-hover)] p-4">
+                  <div className="flex items-start gap-3">
+                    <PiggyBank
+                      size={18}
+                      className="mt-0.5 shrink-0 text-purple-600"
+                    />
+
+                    <div>
+                      <p className="text-sm font-medium text-[var(--text-primary)]">
+                        Savings performance
+                      </p>
+
+                      <p className="mt-1 text-xs leading-5 text-[var(--text-secondary)]">
+                        You retained{" "}
+                        <strong>
+                          {savingsRate.toFixed(
+                            1,
+                          )}
+                          %
+                        </strong>{" "}
+                        of your income during this
+                        period.
+                        {savingsRate >
+                        previousSavingsRate
+                          ? " That's an improvement over the previous period."
+                          : savingsRate <
+                              previousSavingsRate
+                            ? " That's lower than the previous period."
+                            : ""}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Top category */}
                 {topExpense && (
                   <div className="rounded-xl bg-[var(--surface-hover)] p-4">
                     <p className="text-sm font-medium text-[var(--text-primary)]">
-                      Top spending category
+                      Largest spending category
                     </p>
 
-                    <p className="mt-1 text-xs text-[var(--text-secondary)]">
-                      {topExpense.category} accounts
-                      for{" "}
+                    <p className="mt-1 text-xs leading-5 text-[var(--text-secondary)]">
+                      <strong>
+                        {topExpense.category}
+                      </strong>{" "}
+                      accounts for{" "}
                       <strong>
                         {topExpense.percentage.toFixed(
                           1,
                         )}
                         %
                       </strong>{" "}
-                      of your expenses.
+                      of your total expenses.
                     </p>
                   </div>
                 )}
 
+                {/* Highest expense */}
+                {highestExpense && (
+                  <div className="rounded-xl bg-[var(--surface-hover)] p-4">
+                    <p className="text-sm font-medium text-[var(--text-primary)]">
+                      Highest individual expense
+                    </p>
+
+                    <p className="mt-1 text-xs leading-5 text-[var(--text-secondary)]">
+                      <strong>
+                        {highestExpense.description}
+                      </strong>{" "}
+                      was your largest single expense
+                      at{" "}
+                      <strong>
+                        {formatCurrency(
+                          highestExpense.amount,
+                        )}
+                      </strong>
+                      .
+                    </p>
+                  </div>
+                )}
+
+                {/* Activity */}
                 <div className="rounded-xl bg-[var(--surface-hover)] p-4">
                   <p className="text-sm font-medium text-[var(--text-primary)]">
                     Transaction activity
                   </p>
 
-                  <p className="mt-1 text-xs text-[var(--text-secondary)]">
+                  <p className="mt-1 text-xs leading-5 text-[var(--text-secondary)]">
                     You recorded{" "}
                     <strong>
                       {filteredTransactions.length}
@@ -481,18 +911,8 @@ function Analytics() {
                     {filteredTransactions.length ===
                     1
                       ? ""
-                      : "s"} in this period.
-                  </p>
-                </div>
-
-                <div className="rounded-xl bg-[var(--surface-hover)] p-4">
-                  <p className="text-sm font-medium text-[var(--text-primary)]">
-                    Average transaction
-                  </p>
-
-                  <p className="mt-1 text-xs text-[var(--text-secondary)]">
-                    Your average transaction value
-                    was{" "}
+                      : "s"} in this period, with
+                    an average value of{" "}
                     <strong>
                       {formatCurrency(
                         averageTransaction,
