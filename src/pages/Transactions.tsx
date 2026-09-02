@@ -1,55 +1,88 @@
-import { useMemo, useState } from "react"
+import {
+  useMemo,
+  useState,
+} from "react"
 import { Link } from "react-router-dom"
-import { useTransactionsContext } from "../context/TransactionsContext"
+
+import {
+  useTransactionsContext,
+} from "../context/TransactionsContext"
+
 import TransactionItem from "../components/TransactionItem"
+
 import {
   calculateTransactionTotals,
   sortTransactions,
   type TransactionSort,
 } from "../utils/transactions"
+
 import { formatCurrency } from "../utils/currency"
 
+type TransactionTypeFilter =
+  | "all"
+  | "income"
+  | "expense"
+
 function Transactions() {
-  const { transactions, loading, error } =
-    useTransactionsContext()
+  const {
+    transactions,
+    loading,
+    error,
+  } = useTransactionsContext()
 
   const [search, setSearch] = useState("")
-  const [typeFilter, setTypeFilter] = useState("all")
-  const [categoryFilter, setCategoryFilter] = useState("all")
+
+  const [typeFilter, setTypeFilter] =
+    useState<TransactionTypeFilter>("all")
+
+  const [categoryFilter, setCategoryFilter] =
+    useState("all")
+
   const [sort, setSort] =
     useState<TransactionSort>("newest")
 
   const categories = useMemo(() => {
+    const uniqueCategories = new Set(
+      transactions.map(
+        (transaction) => transaction.category,
+      ),
+    )
+
     return [
       "all",
-      ...new Set(
-        transactions.map(
-          (transaction) => transaction.category,
-        ),
+      ...Array.from(uniqueCategories).sort(
+        (a, b) => a.localeCompare(b),
       ),
     ]
   }, [transactions])
 
   const filteredTransactions = useMemo(() => {
-    const filtered = transactions.filter((transaction) => {
-      const matchesSearch = transaction.description
-        .toLowerCase()
-        .includes(search.toLowerCase())
+    const normalizedSearch =
+      search.trim().toLowerCase()
 
-      const matchesType =
-        typeFilter === "all" ||
-        transaction.type === typeFilter
+    const filtered = transactions.filter(
+      (transaction) => {
+        const matchesSearch =
+          normalizedSearch === "" ||
+          transaction.description
+            .toLowerCase()
+            .includes(normalizedSearch)
 
-      const matchesCategory =
-        categoryFilter === "all" ||
-        transaction.category === categoryFilter
+        const matchesType =
+          typeFilter === "all" ||
+          transaction.type === typeFilter
 
-      return (
-        matchesSearch &&
-        matchesType &&
-        matchesCategory
-      )
-    })
+        const matchesCategory =
+          categoryFilter === "all" ||
+          transaction.category === categoryFilter
+
+        return (
+          matchesSearch &&
+          matchesType &&
+          matchesCategory
+        )
+      },
+    )
 
     return sortTransactions(filtered, sort)
   }, [
@@ -60,18 +93,20 @@ function Transactions() {
     sort,
   ])
 
-  
   const transactionTotals = useMemo(
-  () => calculateTransactionTotals(filteredTransactions),
-  [filteredTransactions],
-)
+    () =>
+      calculateTransactionTotals(
+        filteredTransactions,
+      ),
+    [filteredTransactions],
+  )
 
   const netAmount =
     transactionTotals.income -
     transactionTotals.expenses
 
   const hasActiveFilters =
-    search !== "" ||
+    search.trim() !== "" ||
     typeFilter !== "all" ||
     categoryFilter !== "all"
 
@@ -84,11 +119,11 @@ function Transactions() {
   if (loading) {
     return (
       <div>
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+        <h1 className="text-3xl font-bold text-[var(--text-primary)]">
           Transactions
         </h1>
 
-        <p className="mt-2 text-slate-500 dark:text-slate-400">
+        <p className="mt-2 text-[var(--text-secondary)]">
           Loading your financial activity...
         </p>
 
@@ -96,7 +131,7 @@ function Transactions() {
           {[1, 2, 3, 4].map((item) => (
             <div
               key={item}
-              className="h-20 animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800"
+              className="h-20 animate-pulse rounded-2xl bg-[var(--surface)]"
             />
           ))}
         </div>
@@ -107,16 +142,16 @@ function Transactions() {
   if (error) {
     return (
       <div>
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+        <h1 className="text-3xl font-bold text-[var(--text-primary)]">
           Transactions
         </h1>
 
-        <div className="mt-8 rounded-2xl border border-red-200 bg-red-50 p-6 dark:border-red-900/50 dark:bg-red-950/30">
-          <p className="font-medium text-red-600 dark:text-red-400">
+        <div className="mt-8 rounded-2xl border border-red-500/20 bg-red-500/10 p-6">
+          <p className="font-medium text-red-400">
             Unable to load transactions
           </p>
 
-          <p className="mt-2 text-sm text-red-500 dark:text-red-400/80">
+          <p className="mt-2 text-sm text-red-400/80">
             {error}
           </p>
         </div>
@@ -128,12 +163,17 @@ function Transactions() {
     <div>
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+          <p className="text-sm font-medium text-emerald-500">
+            Financial activity
+          </p>
+
+          <h1 className="mt-2 text-3xl font-bold text-[var(--text-primary)]">
             Transactions
           </h1>
 
-          <p className="mt-2 text-slate-500 dark:text-slate-400">
-            View and manage your financial transactions.
+          <p className="mt-2 text-[var(--text-secondary)]">
+            View and manage your financial
+            transactions.
           </p>
         </div>
 
@@ -145,171 +185,221 @@ function Transactions() {
         </Link>
       </header>
 
-      {/* Filters */}
-     <section
-  className="mt-8 rounded-2xl border p-6 shadow-sm"
-  style={{
-    borderColor: "var(--border)",
-    backgroundColor: "var(--surface)",
-  }}
->
-  <div className="mb-5">
-    <h2
-      className="text-sm font-semibold"
-      style={{ color: "var(--text-primary)" }}
-    >
-      Find a transaction
-    </h2>
+      <section
+        className="mt-8 rounded-2xl border p-6 shadow-sm"
+        style={{
+          borderColor: "var(--border)",
+          backgroundColor: "var(--surface)",
+        }}
+      >
+        <div className="mb-5">
+          <h2
+            className="text-sm font-semibold"
+            style={{
+              color: "var(--text-primary)",
+            }}
+          >
+            Find a transaction
+          </h2>
 
-    <p
-      className="mt-1 text-sm"
-      style={{ color: "var(--text-secondary)" }}
-    >
-      Search, filter, or sort your financial activity.
-    </p>
-  </div>
+          <p
+            className="mt-1 text-sm"
+            style={{
+              color: "var(--text-secondary)",
+            }}
+          >
+            Search, filter, or sort your financial
+            activity.
+          </p>
+        </div>
 
-  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-    <input
-      type="text"
-      placeholder="Search transactions..."
-      value={search}
-      onChange={(event) => setSearch(event.target.value)}
-      className="rounded-xl border px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
-      style={{
-        borderColor: "var(--border)",
-        backgroundColor: "var(--surface-hover)",
-        color: "var(--text-primary)",
-      }}
-    />
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <input
+            type="search"
+            placeholder="Search transactions..."
+            value={search}
+            onChange={(event) =>
+              setSearch(event.target.value)
+            }
+            aria-label="Search transactions"
+            className="rounded-xl border px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
+            style={{
+              borderColor: "var(--border)",
+              backgroundColor:
+                "var(--surface-hover)",
+              color: "var(--text-primary)",
+            }}
+          />
 
-    <select
-      value={sort}
-      onChange={(event) =>
-        setSort(event.target.value as TransactionSort)
-      }
-      className="rounded-xl border px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
-      style={{
-        borderColor: "var(--border)",
-        backgroundColor: "var(--surface-hover)",
-        color: "var(--text-primary)",
-      }}
-    >
-      <option value="newest">Newest first</option>
-      <option value="oldest">Oldest first</option>
-      <option value="highest">Highest amount</option>
-      <option value="lowest">Lowest amount</option>
-    </select>
+          <select
+            value={sort}
+            onChange={(event) =>
+              setSort(
+                event.target.value as TransactionSort,
+              )
+            }
+            aria-label="Sort transactions"
+            className="rounded-xl border px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
+            style={{
+              borderColor: "var(--border)",
+              backgroundColor:
+                "var(--surface-hover)",
+              color: "var(--text-primary)",
+            }}
+          >
+            <option value="newest">
+              Newest first
+            </option>
 
-    <select
-      value={typeFilter}
-      onChange={(event) => setTypeFilter(event.target.value)}
-      className="rounded-xl border px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
-      style={{
-        borderColor: "var(--border)",
-        backgroundColor: "var(--surface-hover)",
-        color: "var(--text-primary)",
-      }}
-    >
-      <option value="all">All Types</option>
-      <option value="income">Income</option>
-      <option value="expense">Expenses</option>
-    </select>
+            <option value="oldest">
+              Oldest first
+            </option>
 
-    <select
-      value={categoryFilter}
-      onChange={(event) =>
-        setCategoryFilter(event.target.value)
-      }
-      className="rounded-xl border px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
-      style={{
-        borderColor: "var(--border)",
-        backgroundColor: "var(--surface-hover)",
-        color: "var(--text-primary)",
-      }}
-    >
-      {categories.map((category) => (
-        <option key={category} value={category}>
-          {category === "all"
-            ? "All Categories"
-            : category}
-        </option>
-      ))}
-    </select>
-  </div>
-</section>
+            <option value="highest">
+              Highest amount
+            </option>
 
-      {/* Filtered totals */}
+            <option value="lowest">
+              Lowest amount
+            </option>
+          </select>
+
+          <select
+            value={typeFilter}
+            onChange={(event) =>
+              setTypeFilter(
+                event.target.value as TransactionTypeFilter,
+              )
+            }
+            aria-label="Filter by transaction type"
+            className="rounded-xl border px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
+            style={{
+              borderColor: "var(--border)",
+              backgroundColor:
+                "var(--surface-hover)",
+              color: "var(--text-primary)",
+            }}
+          >
+            <option value="all">
+              All Types
+            </option>
+
+            <option value="income">
+              Income
+            </option>
+
+            <option value="expense">
+              Expenses
+            </option>
+          </select>
+
+          <select
+            value={categoryFilter}
+            onChange={(event) =>
+              setCategoryFilter(event.target.value)
+            }
+            aria-label="Filter by category"
+            className="rounded-xl border px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
+            style={{
+              borderColor: "var(--border)",
+              backgroundColor:
+                "var(--surface-hover)",
+              color: "var(--text-primary)",
+            }}
+          >
+            {categories.map((category) => (
+              <option
+                key={category}
+                value={category}
+              >
+                {category === "all"
+                  ? "All Categories"
+                  : category}
+              </option>
+            ))}
+          </select>
+        </div>
+      </section>
+
       <section className="mt-6 grid gap-4 sm:grid-cols-3">
-  <div
-    className="rounded-2xl border p-5 shadow-sm"
-    style={{
-      borderColor: "var(--border)",
-      backgroundColor: "var(--surface)",
-    }}
-  >
-    <p
-      className="text-sm"
-      style={{ color: "var(--text-secondary)" }}
-    >
-      Filtered Income
-    </p>
+        <div
+          className="rounded-2xl border p-5 shadow-sm"
+          style={{
+            borderColor: "var(--border)",
+            backgroundColor: "var(--surface)",
+          }}
+        >
+          <p
+            className="text-sm"
+            style={{
+              color: "var(--text-secondary)",
+            }}
+          >
+            Filtered Income
+          </p>
 
-    <p className="mt-2 text-2xl font-bold text-emerald-500">
-      {formatCurrency(transactionTotals.income)}
-    </p>
-  </div>
+          <p className="mt-2 text-2xl font-bold text-emerald-500">
+            {formatCurrency(
+              transactionTotals.income,
+            )}
+          </p>
+        </div>
 
-  <div
-    className="rounded-2xl border p-5 shadow-sm"
-    style={{
-      borderColor: "var(--border)",
-      backgroundColor: "var(--surface)",
-    }}
-  >
-    <p
-      className="text-sm"
-      style={{ color: "var(--text-secondary)" }}
-    >
-      Filtered Expenses
-    </p>
+        <div
+          className="rounded-2xl border p-5 shadow-sm"
+          style={{
+            borderColor: "var(--border)",
+            backgroundColor: "var(--surface)",
+          }}
+        >
+          <p
+            className="text-sm"
+            style={{
+              color: "var(--text-secondary)",
+            }}
+          >
+            Filtered Expenses
+          </p>
 
-    <p className="mt-2 text-2xl font-bold text-red-500">
-      {formatCurrency(transactionTotals.expenses)}
-    </p>
-  </div>
+          <p className="mt-2 text-2xl font-bold text-red-500">
+            {formatCurrency(
+              transactionTotals.expenses,
+            )}
+          </p>
+        </div>
 
-  <div
-    className="rounded-2xl border p-5 shadow-sm"
-    style={{
-      borderColor: "var(--border)",
-      backgroundColor: "var(--surface)",
-    }}
-  >
-    <p
-      className="text-sm"
-      style={{ color: "var(--text-secondary)" }}
-    >
-      Net Amount
-    </p>
+        <div
+          className="rounded-2xl border p-5 shadow-sm"
+          style={{
+            borderColor: "var(--border)",
+            backgroundColor: "var(--surface)",
+          }}
+        >
+          <p
+            className="text-sm"
+            style={{
+              color: "var(--text-secondary)",
+            }}
+          >
+            Net Amount
+          </p>
 
-    <p
-      className={`mt-2 text-2xl font-bold ${
-        netAmount >= 0
-          ? "text-emerald-500"
-          : "text-red-500"
-      }`}
-    >
-      {formatCurrency(netAmount)}
-    </p>
-  </div>
-</section>
+          <p
+            className={`mt-2 text-2xl font-bold ${
+              netAmount >= 0
+                ? "text-emerald-500"
+                : "text-red-500"
+            }`}
+          >
+            {formatCurrency(netAmount)}
+          </p>
+        </div>
+      </section>
 
-      {/* Results count */}
-      <div className="mt-6 flex min-h-6 items-center justify-between">
-        <p className="text-sm text-slate-500 dark:text-slate-400">
+      <div className="mt-6 flex min-h-6 items-center justify-between gap-4">
+        <p className="text-sm text-[var(--text-secondary)]">
           Showing{" "}
-          <span className="font-medium text-slate-900 dark:text-white">
+          <span className="font-medium text-[var(--text-primary)]">
             {filteredTransactions.length}
           </span>{" "}
           {filteredTransactions.length === 1
@@ -328,24 +418,26 @@ function Transactions() {
         )}
       </div>
 
-      {/* Transactions */}
       <div className="mt-6 space-y-4">
         {filteredTransactions.length > 0 ? (
-          filteredTransactions.map((transaction) => (
-            <TransactionItem
-              key={transaction.id}
-              transaction={transaction}
-            />
-          ))
+          filteredTransactions.map(
+            (transaction) => (
+              <TransactionItem
+                key={transaction.id}
+                transaction={transaction}
+              />
+            ),
+          )
         ) : (
-          <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center dark:border-slate-800 dark:bg-slate-900">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+          <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)] p-10 text-center">
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">
               No transactions found
             </h2>
 
-            <p className="mx-auto mt-2 max-w-md text-sm text-slate-500 dark:text-slate-400">
-              We couldn't find any transactions matching
-              your current search or filters.
+            <p className="mx-auto mt-2 max-w-md text-sm text-[var(--text-secondary)]">
+              We couldn't find any transactions
+              matching your current search or
+              filters.
             </p>
 
             {hasActiveFilters && (

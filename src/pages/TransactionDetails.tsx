@@ -1,7 +1,16 @@
-import { useState } from "react"
-import type { FormEvent } from "react"
-import { Link, useNavigate, useParams } from "react-router-dom"
+import {
+  useState,
+  type FormEvent,
+} from "react"
+
+import {
+  Link,
+  useNavigate,
+  useParams,
+} from "react-router-dom"
+
 import { useTransactionsContext } from "../context/TransactionsContext"
+
 import { formatCurrency } from "../utils/currency"
 
 const categories = [
@@ -30,22 +39,28 @@ function TransactionDetails() {
     (item) => item.id === Number(id),
   )
 
-  const [isEditing, setIsEditing] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [formError, setFormError] = useState("")
+  const [isEditing, setIsEditing] =
+    useState(false)
 
-  const [description, setDescription] = useState(
-    transaction?.description ?? "",
-  )
+  const [isSaving, setIsSaving] =
+    useState(false)
+
+  const [isDeleting, setIsDeleting] =
+    useState(false)
+
+  const [formError, setFormError] =
+    useState("")
+
+  const [description, setDescription] =
+    useState(transaction?.description ?? "")
 
   const [amount, setAmount] = useState(
     transaction?.amount.toString() ?? "",
   )
 
-  const [type, setType] = useState<"income" | "expense">(
-    transaction?.type ?? "expense",
-  )
+  const [type, setType] = useState<
+    "income" | "expense"
+  >(transaction?.type ?? "expense")
 
   const [category, setCategory] = useState(
     transaction?.category ?? "Food",
@@ -58,7 +73,7 @@ function TransactionDetails() {
   if (loading) {
     return (
       <div>
-        <h1 className="text-3xl font-bold">
+        <h1 className="text-3xl font-bold text-[var(--text-primary)]">
           Transaction Details
         </h1>
 
@@ -72,31 +87,23 @@ function TransactionDetails() {
   if (error && !transaction) {
     return (
       <div>
-        <h1 className="text-3xl font-bold">
+        <h1 className="text-3xl font-bold text-[var(--text-primary)]">
           Transaction Details
         </h1>
 
-        <p className="mt-4 text-red-400">
-          {error}
-        </p>
-      </div>
-    )
-  }
+        <div className="mt-6 rounded-2xl border border-red-500/20 bg-red-500/10 p-6">
+          <p className="font-medium text-red-400">
+            Unable to load transaction
+          </p>
 
-  if (!transaction) {
-    return (
-      <div>
-        <h1 className="text-3xl font-bold">
-          Transaction Not Found
-        </h1>
-
-        <p className="mt-4 text-[var(--text-secondary)]">
-          We couldn't find the transaction you're looking for.
-        </p>
+          <p className="mt-2 text-sm text-red-400/80">
+            {error}
+          </p>
+        </div>
 
         <Link
           to="/transactions"
-          className="mt-6 inline-block text-emerald-400 transition hover:text-emerald-300"
+          className="mt-6 inline-block text-sm font-medium text-emerald-500 transition hover:text-emerald-400"
         >
           ← Back to Transactions
         </Link>
@@ -104,7 +111,30 @@ function TransactionDetails() {
     )
   }
 
-  const isIncome = transaction.type === "income"
+  if (!transaction) {
+    return (
+      <div>
+        <h1 className="text-3xl font-bold text-[var(--text-primary)]">
+          Transaction Not Found
+        </h1>
+
+        <p className="mt-4 text-[var(--text-secondary)]">
+          We couldn't find the transaction
+          you're looking for.
+        </p>
+
+        <Link
+          to="/transactions"
+          className="mt-6 inline-block text-sm font-medium text-emerald-500 transition hover:text-emerald-400"
+        >
+          ← Back to Transactions
+        </Link>
+      </div>
+    )
+  }
+
+  const isIncome =
+    transaction.type === "income"
 
   const formattedDate = new Date(
     transaction.date,
@@ -114,26 +144,63 @@ function TransactionDetails() {
     year: "numeric",
   })
 
+  const handleStartEditing = () => {
+    setDescription(transaction.description)
+    setAmount(
+      transaction.amount.toString(),
+    )
+    setType(transaction.type)
+    setCategory(transaction.category)
+    setDate(transaction.date)
+    setFormError("")
+    setIsEditing(true)
+  }
+
+  const handleCancelEditing = () => {
+    setDescription(transaction.description)
+    setAmount(
+      transaction.amount.toString(),
+    )
+    setType(transaction.type)
+    setCategory(transaction.category)
+    setDate(transaction.date)
+    setFormError("")
+    setIsEditing(false)
+  }
+
   const handleEdit = async (
     event: FormEvent<HTMLFormElement>,
   ) => {
     event.preventDefault()
+
     setFormError("")
+
+    const trimmedDescription =
+      description.trim()
 
     const numericAmount = Number(amount)
 
-    if (!description.trim()) {
-      setFormError("Please enter a description.")
+    if (!trimmedDescription) {
+      setFormError(
+        "Please enter a description.",
+      )
       return
     }
 
-    if (!numericAmount || numericAmount <= 0) {
-      setFormError("Please enter a valid amount.")
+    if (
+      !Number.isFinite(numericAmount) ||
+      numericAmount <= 0
+    ) {
+      setFormError(
+        "Please enter a valid amount greater than zero.",
+      )
       return
     }
 
     if (!date) {
-      setFormError("Please select a date.")
+      setFormError(
+        "Please select a date.",
+      )
       return
     }
 
@@ -141,11 +208,17 @@ function TransactionDetails() {
       setIsSaving(true)
 
       await editTransaction(transaction.id, {
-        description: description.trim(),
+        description: trimmedDescription,
         amount: numericAmount,
         type,
         category,
         date,
+        ...(transaction.accountId
+          ? {
+              accountId:
+                transaction.accountId,
+            }
+          : {}),
       })
 
       setIsEditing(false)
@@ -160,7 +233,7 @@ function TransactionDetails() {
 
   const handleDelete = async () => {
     const confirmed = window.confirm(
-      "Are you sure you want to delete this transaction? This action cannot be undone.",
+      `Are you sure you want to delete "${transaction.description}"? This action cannot be undone.`,
     )
 
     if (!confirmed) {
@@ -178,6 +251,7 @@ function TransactionDetails() {
       setFormError(
         "Unable to delete transaction. Please try again.",
       )
+
       setIsDeleting(false)
     }
   }
@@ -186,35 +260,27 @@ function TransactionDetails() {
     <div>
       <Link
         to="/transactions"
-        className="text-sm text-[var(--text-secondary)] transition hover:text-[var(--text-primary)]"
+        className="text-sm font-medium text-[var(--text-secondary)] transition hover:text-[var(--text-primary)]"
       >
         ← Back to Transactions
       </Link>
 
       <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
+        <div className="min-w-0">
           <p className="text-sm text-[var(--text-secondary)]">
             Transaction Details
           </p>
 
-          <h1 className="mt-2 text-3xl font-bold">
+          <h1 className="mt-2 truncate text-3xl font-bold text-[var(--text-primary)]">
             {transaction.description}
           </h1>
         </div>
 
         {!isEditing && (
-          <div className="flex gap-3">
+          <div className="flex shrink-0 gap-3">
             <button
               type="button"
-              onClick={() => {
-                setDescription(transaction.description)
-                setAmount(transaction.amount.toString())
-                setType(transaction.type)
-                setCategory(transaction.category)
-                setDate(transaction.date)
-                setFormError("")
-                setIsEditing(true)
-              }}
+              onClick={handleStartEditing}
               className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm font-semibold transition hover:bg-[var(--surface-hover)]"
             >
               Edit
@@ -226,20 +292,25 @@ function TransactionDetails() {
               disabled={isDeleting}
               className="rounded-xl bg-red-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isDeleting ? "Deleting..." : "Delete"}
+              {isDeleting
+                ? "Deleting..."
+                : "Delete"}
             </button>
           </div>
         )}
       </div>
 
       {formError && (
-        <div className="mt-6 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
+        <div
+          role="alert"
+          className="mt-6 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400"
+        >
           {formError}
         </div>
       )}
 
       {isEditing ? (
-        <section className="mt-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
+        <section className="mt-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 md:p-8">
           <form
             onSubmit={handleEdit}
             className="space-y-6"
@@ -257,9 +328,12 @@ function TransactionDetails() {
                 type="text"
                 value={description}
                 onChange={(event) =>
-                  setDescription(event.target.value)
+                  setDescription(
+                    event.target.value,
+                  )
                 }
-                className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
+                maxLength={120}
+                className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
               />
             </div>
 
@@ -275,13 +349,15 @@ function TransactionDetails() {
                 <input
                   id="amount"
                   type="number"
-                  min="0"
+                  min="0.01"
                   step="0.01"
                   value={amount}
                   onChange={(event) =>
-                    setAmount(event.target.value)
+                    setAmount(
+                      event.target.value,
+                    )
                   }
-                  className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
+                  className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
                 />
               </div>
 
@@ -300,7 +376,7 @@ function TransactionDetails() {
                   onChange={(event) =>
                     setDate(event.target.value)
                   }
-                  className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
+                  className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
                 />
               </div>
             </div>
@@ -319,12 +395,13 @@ function TransactionDetails() {
                   value={type}
                   onChange={(event) =>
                     setType(
-                      event.target.value as
+                      event.target
+                        .value as
                         | "income"
                         | "expense",
                     )
                   }
-                  className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
+                  className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
                 >
                   <option value="expense">
                     Expense
@@ -348,18 +425,22 @@ function TransactionDetails() {
                   id="category"
                   value={category}
                   onChange={(event) =>
-                    setCategory(event.target.value)
+                    setCategory(
+                      event.target.value,
+                    )
                   }
-                  className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
+                  className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
                 >
-                  {categories.map((item) => (
-                    <option
-                      key={item}
-                      value={item}
-                    >
-                      {item}
-                    </option>
-                  ))}
+                  {categories.map(
+                    (item) => (
+                      <option
+                        key={item}
+                        value={item}
+                      >
+                        {item}
+                      </option>
+                    ),
+                  )}
                 </select>
               </div>
             </div>
@@ -367,11 +448,11 @@ function TransactionDetails() {
             <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <button
                 type="button"
-                onClick={() => {
-                  setIsEditing(false)
-                  setFormError("")
-                }}
-                className="rounded-xl border border-[var(--border)] px-5 py-3 text-sm font-semibold transition hover:bg-[var(--surface-hover)]"
+                onClick={
+                  handleCancelEditing
+                }
+                disabled={isSaving}
+                className="rounded-xl border border-[var(--border)] px-5 py-3 text-sm font-semibold transition hover:bg-[var(--surface-hover)] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Cancel
               </button>
@@ -381,7 +462,9 @@ function TransactionDetails() {
                 disabled={isSaving}
                 className="rounded-xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isSaving ? "Saving..." : "Save Changes"}
+                {isSaving
+                  ? "Saving..."
+                  : "Save Changes"}
               </button>
             </div>
           </form>
@@ -403,7 +486,9 @@ function TransactionDetails() {
                   }`}
                 >
                   {isIncome ? "+" : "-"}
-                  {formatCurrency(transaction.amount)}
+                  {formatCurrency(
+                    transaction.amount,
+                  )}
                 </h2>
               </div>
 
@@ -414,7 +499,9 @@ function TransactionDetails() {
                     : "bg-red-400/10 text-red-400"
                 }`}
               >
-                {isIncome ? "Income" : "Expense"}
+                {isIncome
+                  ? "Income"
+                  : "Expense"}
               </span>
             </div>
 
@@ -423,7 +510,7 @@ function TransactionDetails() {
                 Description
               </p>
 
-              <p className="mt-2 leading-6">
+              <p className="mt-2 leading-6 text-[var(--text-primary)]">
                 {transaction.description}
               </p>
             </div>
@@ -434,7 +521,7 @@ function TransactionDetails() {
                   Category
                 </p>
 
-                <p className="mt-2 font-medium">
+                <p className="mt-2 font-medium text-[var(--text-primary)]">
                   {transaction.category}
                 </p>
               </div>
@@ -444,7 +531,7 @@ function TransactionDetails() {
                   Date
                 </p>
 
-                <p className="mt-2 font-medium">
+                <p className="mt-2 font-medium text-[var(--text-primary)]">
                   {formattedDate}
                 </p>
               </div>
@@ -454,7 +541,7 @@ function TransactionDetails() {
                   Transaction ID
                 </p>
 
-                <p className="mt-2 font-medium">
+                <p className="mt-2 font-medium text-[var(--text-primary)]">
                   #{transaction.id}
                 </p>
               </div>

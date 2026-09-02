@@ -1,11 +1,18 @@
-import { useCallback, useEffect, useState } from "react"
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from "react"
+
 import {
   createTransaction,
   deleteTransaction,
   getTransactions,
   updateTransaction,
 } from "../api/transactions"
+
 import type { Transaction } from "../types/transaction"
+
 import {
   TransactionsContext,
 } from "./TransactionsContext"
@@ -19,13 +26,27 @@ const STORAGE_KEY = "finflow-transactions"
 function TransactionsProvider({
   children,
 }: TransactionsProviderProps) {
-  const [transactions, setTransactions] = useState<
-    Transaction[]
-  >([])
+  const [transactions, setTransactions] =
+    useState<Transaction[]>([])
 
   const [loading, setLoading] = useState(true)
 
   const [error, setError] = useState<string | null>(null)
+
+  const saveTransactionsToStorage = useCallback(
+    (data: Transaction[]) => {
+      try {
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify(data),
+        )
+      } catch {
+        // Storage failure should not prevent the UI
+        // from continuing to work.
+      }
+    },
+    [],
+  )
 
   const refreshTransactions = useCallback(async () => {
     try {
@@ -36,24 +57,30 @@ function TransactionsProvider({
         localStorage.getItem(STORAGE_KEY)
 
       if (storedTransactions) {
-        setTransactions(JSON.parse(storedTransactions))
-        return
+        try {
+          const parsedTransactions = JSON.parse(
+            storedTransactions,
+          )
+
+          if (Array.isArray(parsedTransactions)) {
+            setTransactions(parsedTransactions)
+            return
+          }
+        } catch {
+          localStorage.removeItem(STORAGE_KEY)
+        }
       }
 
       const data = await getTransactions()
 
       setTransactions(data)
-
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(data),
-      )
+      saveTransactionsToStorage(data)
     } catch {
       setError("Failed to load transactions.")
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [saveTransactionsToStorage])
 
   const addTransaction = useCallback(
     async (
@@ -71,9 +98,8 @@ function TransactionsProvider({
             ...current,
           ]
 
-          localStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify(updatedTransactions),
+          saveTransactionsToStorage(
+            updatedTransactions,
           )
 
           return updatedTransactions
@@ -82,12 +108,13 @@ function TransactionsProvider({
         return newTransaction
       } catch {
         setError("Failed to create transaction.")
+
         throw new Error(
           "Failed to create transaction.",
         )
       }
     },
-    [],
+    [saveTransactionsToStorage],
   )
 
   const editTransaction = useCallback(
@@ -109,9 +136,8 @@ function TransactionsProvider({
                 : item,
           )
 
-          localStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify(updatedTransactions),
+          saveTransactionsToStorage(
+            updatedTransactions,
           )
 
           return updatedTransactions
@@ -120,12 +146,13 @@ function TransactionsProvider({
         return updatedTransaction
       } catch {
         setError("Failed to update transaction.")
+
         throw new Error(
           "Failed to update transaction.",
         )
       }
     },
-    [],
+    [saveTransactionsToStorage],
   )
 
   const removeTransaction = useCallback(
@@ -141,25 +168,25 @@ function TransactionsProvider({
               (item) => item.id !== id,
             )
 
-          localStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify(updatedTransactions),
+          saveTransactionsToStorage(
+            updatedTransactions,
           )
 
           return updatedTransactions
         })
       } catch {
         setError("Failed to delete transaction.")
+
         throw new Error(
           "Failed to delete transaction.",
         )
       }
     },
-    [],
+    [saveTransactionsToStorage],
   )
 
   useEffect(() => {
-    refreshTransactions()
+    void refreshTransactions()
   }, [refreshTransactions])
 
   return (

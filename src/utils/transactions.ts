@@ -11,29 +11,28 @@ export function sortTransactions(
   sort: TransactionSort,
 ): Transaction[] {
   return [...transactions].sort((a, b) => {
-    if (sort === "newest") {
-      return (
-        new Date(b.date).getTime() -
-        new Date(a.date).getTime()
-      )
-    }
+    switch (sort) {
+      case "newest":
+        return (
+          new Date(b.date).getTime() -
+          new Date(a.date).getTime()
+        )
 
-    if (sort === "oldest") {
-      return (
-        new Date(a.date).getTime() -
-        new Date(b.date).getTime()
-      )
-    }
+      case "oldest":
+        return (
+          new Date(a.date).getTime() -
+          new Date(b.date).getTime()
+        )
 
-    if (sort === "highest") {
-      return b.amount - a.amount
-    }
+      case "highest":
+        return b.amount - a.amount
 
-    if (sort === "lowest") {
-      return a.amount - b.amount
-    }
+      case "lowest":
+        return a.amount - b.amount
 
-    return 0
+      default:
+        return 0
+    }
   })
 }
 

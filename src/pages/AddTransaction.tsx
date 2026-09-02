@@ -1,7 +1,12 @@
 import { useState } from "react"
 import type { FormEvent } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import {
+  Link,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom"
 import { useTransactionsContext } from "../context/TransactionsContext"
+import { useAccountsContext } from "../context/AccountsContext"
 
 const categories = [
   "Salary",
@@ -15,18 +20,29 @@ const categories = [
 
 function AddTransaction() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
 
   const { addTransaction } = useTransactionsContext()
+  const { accounts } = useAccountsContext()
+
+  const accountId = searchParams.get("accountId")
+
+  const selectedAccount = accounts.find(
+    (account) => account.id === accountId,
+  )
 
   const [description, setDescription] = useState("")
   const [amount, setAmount] = useState("")
-  const [type, setType] = useState<"income" | "expense">(
-    "expense",
-  )
+  const [type, setType] = useState<
+    "income" | "expense"
+  >("expense")
   const [category, setCategory] = useState("Food")
   const [date, setDate] = useState(
     new Date().toISOString().split("T")[0],
   )
+
+  const [selectedAccountId, setSelectedAccountId] =
+    useState(accountId ?? "")
 
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState("")
@@ -41,7 +57,9 @@ function AddTransaction() {
     const numericAmount = Number(amount)
 
     if (!description.trim()) {
-      setError("Please enter a transaction description.")
+      setError(
+        "Please enter a transaction description.",
+      )
       return
     }
 
@@ -55,6 +73,11 @@ function AddTransaction() {
       return
     }
 
+    if (!selectedAccountId) {
+      setError("Please select an account.")
+      return
+    }
+
     try {
       setSubmitting(true)
 
@@ -64,11 +87,16 @@ function AddTransaction() {
         type,
         category,
         date,
+        accountId: selectedAccountId,
       })
 
-      navigate("/transactions")
+      navigate(
+        `/accounts/${selectedAccountId}`,
+      )
     } catch {
-      setError("Unable to create transaction. Please try again.")
+      setError(
+        "Unable to create transaction. Please try again.",
+      )
     } finally {
       setSubmitting(false)
     }
@@ -77,16 +105,21 @@ function AddTransaction() {
   return (
     <div>
       <header>
-        <div className="flex items-center gap-3">
-          <Link
-            to="/transactions"
-            className="text-sm font-medium text-[var(--text-secondary)] transition hover:text-[var(--text-primary)]"
-          >
-            ← Transactions
-          </Link>
-        </div>
+        <Link
+          to={
+            selectedAccountId
+              ? `/accounts/${selectedAccountId}`
+              : "/transactions"
+          }
+          className="text-sm font-medium text-[var(--text-secondary)] transition hover:text-[var(--text-primary)]"
+        >
+          ←{" "}
+          {selectedAccount
+            ? selectedAccount.name
+            : "Transactions"}
+        </Link>
 
-        <h1 className="mt-4 text-3xl font-bold">
+        <h1 className="mt-4 text-3xl font-bold text-[var(--text-primary)]">
           Add Transaction
         </h1>
 
@@ -222,6 +255,43 @@ function AddTransaction() {
             </div>
           </div>
 
+          <div>
+            <label
+              htmlFor="account"
+              className="text-sm font-medium text-[var(--text-secondary)]"
+            >
+              Account
+            </label>
+
+            <select
+              id="account"
+              value={selectedAccountId}
+              onChange={(event) =>
+                setSelectedAccountId(
+                  event.target.value,
+                )
+              }
+              className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
+            >
+              <option value="">
+                Select an account
+              </option>
+
+              {accounts.map((account) => (
+                <option
+                  key={account.id}
+                  value={account.id}
+                >
+                  {account.name} —{" "}
+                  {formatCurrencyPreview(
+                    account.balance,
+                    account.currency,
+                  )}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {error && (
             <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
               {error}
@@ -230,7 +300,11 @@ function AddTransaction() {
 
           <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <Link
-              to="/transactions"
+              to={
+                selectedAccountId
+                  ? `/accounts/${selectedAccountId}`
+                  : "/transactions"
+              }
               className="rounded-xl border border-[var(--border)] px-5 py-3 text-center text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
             >
               Cancel
@@ -250,6 +324,17 @@ function AddTransaction() {
       </section>
     </div>
   )
+}
+
+function formatCurrencyPreview(
+  amount: number,
+  accountCurrency: string,
+) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: accountCurrency,
+    maximumFractionDigits: 0,
+  }).format(amount)
 }
 
 export default AddTransaction

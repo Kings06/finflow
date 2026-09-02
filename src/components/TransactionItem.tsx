@@ -10,9 +10,11 @@ import {
   ShoppingBag,
   Utensils,
 } from "lucide-react"
+
 import { Link } from "react-router-dom"
 
 import type { Transaction } from "../types/transaction"
+
 import { formatCurrency } from "../utils/currency"
 
 type TransactionItemProps = {
@@ -22,12 +24,10 @@ type TransactionItemProps = {
 function TransactionItem({
   transaction,
 }: TransactionItemProps) {
-  const isIncome = transaction.type === "income"
+  const isIncome =
+    transaction.type === "income"
 
-  const categoryIcons: Record<
-    string,
-    typeof CreditCard
-  > = {
+  const categoryIcons = {
     Salary: Banknote,
     Food: Utensils,
     Transport: Bus,
@@ -35,10 +35,11 @@ function TransactionItem({
     Bills: CreditCard,
     Entertainment: Film,
     Others: Gift,
-  }
+  } as const
 
   const CategoryIcon =
-    categoryIcons[transaction.category] ?? CreditCard
+    categoryIcons[transaction.category as keyof typeof categoryIcons] ??
+    CreditCard
 
   const formattedDate = new Date(
     transaction.date,
@@ -63,15 +64,16 @@ function TransactionItem({
                 : "bg-red-500/10 text-red-500"
             }`}
           >
-            <CategoryIcon size={20} strokeWidth={2} />
+            <CategoryIcon
+              size={20}
+              strokeWidth={2}
+            />
           </div>
 
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <h3 className="truncate font-semibold text-[var(--text-primary)] transition group-hover:text-emerald-500">
-                {transaction.description}
-              </h3>
-            </div>
+            <h3 className="truncate font-semibold text-[var(--text-primary)] transition group-hover:text-emerald-500">
+              {transaction.description}
+            </h3>
 
             <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--text-secondary)] sm:text-sm">
               <span className="inline-flex items-center gap-1">
@@ -100,7 +102,9 @@ function TransactionItem({
                 }`}
               >
                 {isIncome ? "+" : "-"}
-                {formatCurrency(transaction.amount)}
+                {formatCurrency(
+                  transaction.amount,
+                )}
               </p>
 
               <p
@@ -110,7 +114,9 @@ function TransactionItem({
                     : "text-red-500/70"
                 }`}
               >
-                {isIncome ? "Income" : "Expense"}
+                {isIncome
+                  ? "Income"
+                  : "Expense"}
               </p>
             </div>
 

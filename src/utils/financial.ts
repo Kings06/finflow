@@ -10,22 +10,31 @@ export function calculateFinancialSummary(
   transactions: Transaction[],
 ): FinancialSummary {
   const totalIncome = transactions
-    .filter((transaction) => transaction.type === "income")
+    .filter(
+      (transaction) =>
+        transaction.type === "income",
+    )
     .reduce(
-      (total, transaction) => total + transaction.amount,
+      (total, transaction) =>
+        total + transaction.amount,
       0,
     )
 
   const totalExpenses = transactions
-    .filter((transaction) => transaction.type === "expense")
+    .filter(
+      (transaction) =>
+        transaction.type === "expense",
+    )
     .reduce(
-      (total, transaction) => total + transaction.amount,
+      (total, transaction) =>
+        total + transaction.amount,
       0,
     )
 
   return {
     totalIncome,
     totalExpenses,
-    totalBalance: totalIncome - totalExpenses,
+    totalBalance:
+      totalIncome - totalExpenses,
   }
 }

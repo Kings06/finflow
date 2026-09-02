@@ -1,5 +1,6 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -7,7 +8,11 @@ import {
   type ReactNode,
 } from "react"
 
-export type Currency = "NGN" | "USD" | "EUR" | "GBP"
+export type Currency =
+  | "NGN"
+  | "USD"
+  | "EUR"
+  | "GBP"
 
 type Preferences = {
   name: string
@@ -16,12 +21,15 @@ type Preferences = {
   notifications: boolean
 }
 
-type PreferencesContextValue = Preferences & {
-  setName: (name: string) => void
-  setEmail: (email: string) => void
-  setCurrency: (currency: Currency) => void
-  setNotifications: (enabled: boolean) => void
-}
+type PreferencesContextValue =
+  Preferences & {
+    setName: (name: string) => void
+    setEmail: (email: string) => void
+    setCurrency: (currency: Currency) => void
+    setNotifications: (
+      enabled: boolean,
+    ) => void
+  }
 
 const defaultPreferences: Preferences = {
   name: "FinFlow User",
@@ -30,10 +38,32 @@ const defaultPreferences: Preferences = {
   notifications: true,
 }
 
-const PreferencesContext =
-  createContext<PreferencesContextValue | null>(null)
-
 const STORAGE_KEY = "finflow-preferences"
+
+const PreferencesContext =
+  createContext<PreferencesContextValue | null>(
+    null,
+  )
+
+function getStoredPreferences(): Preferences {
+  try {
+    const stored =
+      localStorage.getItem(STORAGE_KEY)
+
+    if (!stored) {
+      return defaultPreferences
+    }
+
+    const parsed = JSON.parse(stored)
+
+    return {
+      ...defaultPreferences,
+      ...parsed,
+    }
+  } catch {
+    return defaultPreferences
+  }
+}
 
 function PreferencesProvider({
   children,
@@ -41,63 +71,76 @@ function PreferencesProvider({
   children: ReactNode
 }) {
   const [preferences, setPreferences] =
-    useState<Preferences>(() => {
-      const stored = localStorage.getItem(STORAGE_KEY)
-
-      if (!stored) {
-        return defaultPreferences
-      }
-
-      try {
-        return {
-          ...defaultPreferences,
-          ...JSON.parse(stored),
-        }
-      } catch {
-        return defaultPreferences
-      }
-    })
+    useState<Preferences>(
+      getStoredPreferences,
+    )
 
   useEffect(() => {
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(preferences),
-    )
+    try {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(preferences),
+      )
+    } catch {
+      // Ignore storage failures.
+    }
   }, [preferences])
+
+  const setName = useCallback(
+    (name: string) => {
+      setPreferences((current) => ({
+        ...current,
+        name,
+      }))
+    },
+    [],
+  )
+
+  const setEmail = useCallback(
+    (email: string) => {
+      setPreferences((current) => ({
+        ...current,
+        email,
+      }))
+    },
+    [],
+  )
+
+  const setCurrency = useCallback(
+    (currency: Currency) => {
+      setPreferences((current) => ({
+        ...current,
+        currency,
+      }))
+    },
+    [],
+  )
+
+  const setNotifications = useCallback(
+    (enabled: boolean) => {
+      setPreferences((current) => ({
+        ...current,
+        notifications: enabled,
+      }))
+    },
+    [],
+  )
 
   const value = useMemo(
     () => ({
       ...preferences,
-
-      setName: (name: string) => {
-        setPreferences((current) => ({
-          ...current,
-          name,
-        }))
-      },
-
-      setEmail: (email: string) => {
-        setPreferences((current) => ({
-          ...current,
-          email,
-        }))
-      },
-
-      setCurrency: (currency: Currency) => {
-        setPreferences((current) => ({
-          ...current,
-          currency,
-        }))
-      },
-
-      setNotifications: (enabled: boolean) => {
-        setPreferences((current) => ({
-          ...current,
-          notifications: enabled,
-        }))
-      },
+      setName,
+      setEmail,
+      setCurrency,
+      setNotifications,
     }),
-    [preferences],
+    [
+      preferences,
+      setName,
+      setEmail,
+      setCurrency,
+      setNotifications,
+    ],
   )
 
   return (
@@ -108,7 +151,9 @@ function PreferencesProvider({
 }
 
 export function usePreferences() {
-  const context = useContext(PreferencesContext)
+  const context = useContext(
+    PreferencesContext,
+  )
 
   if (!context) {
     throw new Error(

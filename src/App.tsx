@@ -9,11 +9,16 @@ import AddTransaction from "./pages/AddTransaction"
 import TransactionDetails from "./pages/TransactionDetails"
 import Analytics from "./pages/Analytics"
 import Accounts from "./pages/Accounts"
+import AddAccount from "./pages/AddAccount"
+import AccountDetails from "./pages/AccountDetails"
+import EditAccount from "./pages/EditAccount"
 import Settings from "./pages/Settings"
 import Bills from "./pages/Bills"
 
 import PreferencesProvider from "./context/PreferencesContext"
+import TransactionsProvider from "./context/TransactionsProvider"
 import BillsProvider from "./context/BillsContext"
+import { AccountsProvider } from "./context/AccountsContext"
 
 function App() {
   const [isMobileNavOpen, setIsMobileNavOpen] =
@@ -26,64 +31,83 @@ function App() {
   return (
     <BrowserRouter>
       <PreferencesProvider>
-        <BillsProvider>
-          <div className="min-h-screen bg-(--background) text-(--text-primary) transition-colors duration-200">
-            <MobileNav
-              isOpen={isMobileNavOpen}
-              onToggle={toggleMobileNav}
-            />
+        <TransactionsProvider>
+          <BillsProvider>
+            <AccountsProvider>
+              <div className="min-h-screen bg-[var(--background)] text-[var(--text-primary)] transition-colors duration-200">
+                <MobileNav
+                  isOpen={isMobileNavOpen}
+                  onToggle={toggleMobileNav}
+                />
 
-            <div className="flex">
-              <Sidebar />
+                <div className="flex">
+                  <Sidebar />
 
-              <main className="min-w-0 flex-1 px-6 py-8 md:px-10">
-                <div className="mx-auto max-w-7xl">
-                  <Routes>
-                    <Route
-                      path="/"
-                      element={<Dashboard />}
-                    />
+                  <main className="min-w-0 flex-1 px-6 py-8 md:px-10">
+                    <div className="mx-auto max-w-7xl">
+                      <Routes>
+                        <Route
+                          path="/"
+                          element={<Dashboard />}
+                        />
 
-                    <Route
-                      path="/transactions"
-                      element={<Transactions />}
-                    />
+                        <Route
+                          path="/transactions"
+                          element={<Transactions />}
+                        />
 
-                    <Route
-                      path="/transactions/new"
-                      element={<AddTransaction />}
-                    />
+                        <Route
+                          path="/transactions/new"
+                          element={<AddTransaction />}
+                        />
 
-                    <Route
-                      path="/transactions/:id"
-                      element={<TransactionDetails />}
-                    />
+                        <Route
+                          path="/transactions/:id"
+                          element={<TransactionDetails />}
+                        />
 
-                    <Route
-                      path="/analytics"
-                      element={<Analytics />}
-                    />
+                        <Route
+                          path="/accounts/:id/edit"
+                          element={<EditAccount />}
+                        />
 
-                    <Route
-                      path="/accounts"
-                      element={<Accounts />}
-                    />
+                        <Route
+                          path="/analytics"
+                          element={<Analytics />}
+                        />
 
-                    <Route
-                      path="/bills"
-                      element={<Bills />}
-                    />
+                        <Route
+                          path="/accounts"
+                          element={<Accounts />}
+                        />
 
-                    <Route
-                      path="/settings"
-                      element={<Settings />}
-                    />
-                  </Routes>
+                        <Route
+                          path="/accounts/:id"
+                          element={<AccountDetails />}
+                        />
+
+                        <Route
+                          path="/accounts/new"
+                          element={<AddAccount />}
+                        />
+
+                        <Route
+                          path="/bills"
+                          element={<Bills />}
+                        />
+
+                        <Route
+                          path="/settings"
+                          element={<Settings />}
+                        />
+                      </Routes>
+                    </div>
+                  </main>
                 </div>
-              </main>
-            </div>
-          </div>
-        </BillsProvider>
+              </div>
+            </AccountsProvider>
+          </BillsProvider>
+        </TransactionsProvider>
       </PreferencesProvider>
     </BrowserRouter>
   )
