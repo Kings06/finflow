@@ -9,9 +9,13 @@ import {
   useParams,
 } from "react-router-dom"
 
-import { useTransactionsContext } from "../context/TransactionsContext"
+import {
+  useTransactionsContext,
+} from "../context/TransactionsContext"
 
 import { formatCurrency } from "../utils/currency"
+
+import type { TransactionType } from "../types/transaction"
 
 const categories = [
   "Salary",
@@ -52,23 +56,19 @@ function TransactionDetails() {
     useState("")
 
   const [description, setDescription] =
-    useState(transaction?.description ?? "")
+    useState("")
 
-  const [amount, setAmount] = useState(
-    transaction?.amount.toString() ?? "",
-  )
+  const [amount, setAmount] =
+    useState("")
 
-  const [type, setType] = useState<
-    "income" | "expense"
-  >(transaction?.type ?? "expense")
+  const [type, setType] =
+    useState<TransactionType>("expense")
 
-  const [category, setCategory] = useState(
-    transaction?.category ?? "Food",
-  )
+  const [category, setCategory] =
+    useState("Food")
 
-  const [date, setDate] = useState(
-    transaction?.date ?? "",
-  )
+  const [date, setDate] =
+    useState("")
 
   if (loading) {
     return (
@@ -80,6 +80,8 @@ function TransactionDetails() {
         <p className="mt-4 text-[var(--text-secondary)]">
           Loading transaction...
         </p>
+
+        <div className="mt-8 h-64 animate-pulse rounded-2xl bg-[var(--surface)]" />
       </div>
     )
   }
@@ -207,19 +209,22 @@ function TransactionDetails() {
     try {
       setIsSaving(true)
 
-      await editTransaction(transaction.id, {
-        description: trimmedDescription,
-        amount: numericAmount,
-        type,
-        category,
-        date,
-        ...(transaction.accountId
-          ? {
-              accountId:
-                transaction.accountId,
-            }
-          : {}),
-      })
+      await editTransaction(
+        transaction.id,
+        {
+          description: trimmedDescription,
+          amount: numericAmount,
+          type,
+          category,
+          date,
+          ...(transaction.accountId
+            ? {
+                accountId:
+                  transaction.accountId,
+              }
+            : {}),
+        },
+      )
 
       setIsEditing(false)
     } catch {
@@ -244,7 +249,9 @@ function TransactionDetails() {
       setIsDeleting(true)
       setFormError("")
 
-      await removeTransaction(transaction.id)
+      await removeTransaction(
+        transaction.id,
+      )
 
       navigate("/transactions")
     } catch {
@@ -281,7 +288,8 @@ function TransactionDetails() {
             <button
               type="button"
               onClick={handleStartEditing}
-              className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm font-semibold transition hover:bg-[var(--surface-hover)]"
+              disabled={isDeleting}
+              className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm font-semibold text-[var(--text-primary)] transition hover:bg-[var(--surface-hover)] disabled:cursor-not-allowed disabled:opacity-60"
             >
               Edit
             </button>
@@ -310,7 +318,7 @@ function TransactionDetails() {
       )}
 
       {isEditing ? (
-        <section className="mt-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 md:p-8">
+        <section className="mt-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm md:p-8">
           <form
             onSubmit={handleEdit}
             className="space-y-6"
@@ -333,7 +341,7 @@ function TransactionDetails() {
                   )
                 }
                 maxLength={120}
-                className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
+                className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none transition placeholder:text-[var(--text-muted)] focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
               />
             </div>
 
@@ -374,7 +382,9 @@ function TransactionDetails() {
                   type="date"
                   value={date}
                   onChange={(event) =>
-                    setDate(event.target.value)
+                    setDate(
+                      event.target.value,
+                    )
                   }
                   className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
                 />
@@ -396,9 +406,7 @@ function TransactionDetails() {
                   onChange={(event) =>
                     setType(
                       event.target
-                        .value as
-                        | "income"
-                        | "expense",
+                        .value as TransactionType,
                     )
                   }
                   className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
@@ -452,7 +460,7 @@ function TransactionDetails() {
                   handleCancelEditing
                 }
                 disabled={isSaving}
-                className="rounded-xl border border-[var(--border)] px-5 py-3 text-sm font-semibold transition hover:bg-[var(--surface-hover)] disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-xl border border-[var(--border)] px-5 py-3 text-sm font-semibold text-[var(--text-primary)] transition hover:bg-[var(--surface-hover)] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Cancel
               </button>
@@ -470,7 +478,7 @@ function TransactionDetails() {
           </form>
         </section>
       ) : (
-        <section className="mt-8 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
+        <section className="mt-8 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm">
           <div className="p-6 md:p-8">
             <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
               <div>
@@ -481,8 +489,8 @@ function TransactionDetails() {
                 <h2
                   className={`mt-2 text-4xl font-bold ${
                     isIncome
-                      ? "text-emerald-400"
-                      : "text-red-400"
+                      ? "text-emerald-500"
+                      : "text-red-500"
                   }`}
                 >
                   {isIncome ? "+" : "-"}
@@ -495,8 +503,8 @@ function TransactionDetails() {
               <span
                 className={`w-fit rounded-full px-4 py-2 text-sm font-medium ${
                   isIncome
-                    ? "bg-emerald-400/10 text-emerald-400"
-                    : "bg-red-400/10 text-red-400"
+                    ? "bg-emerald-500/10 text-emerald-500"
+                    : "bg-red-500/10 text-red-500"
                 }`}
               >
                 {isIncome
@@ -546,6 +554,18 @@ function TransactionDetails() {
                 </p>
               </div>
             </div>
+
+            {transaction.accountId && (
+              <div className="mt-8 border-t border-[var(--border)] pt-6">
+                <p className="text-sm text-[var(--text-muted)]">
+                  Account
+                </p>
+
+                <p className="mt-2 font-medium text-[var(--text-primary)]">
+                  Linked account
+                </p>
+              </div>
+            )}
           </div>
         </section>
       )}

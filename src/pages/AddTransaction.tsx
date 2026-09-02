@@ -5,8 +5,11 @@ import {
   useNavigate,
   useSearchParams,
 } from "react-router-dom"
+
 import { useTransactionsContext } from "../context/TransactionsContext"
 import { useAccountsContext } from "../context/AccountsContext"
+import type { TransactionType } from "../types/transaction"
+import type { Currency } from "../context/PreferencesContext"
 
 const categories = [
   "Salary",
@@ -25,27 +28,45 @@ function AddTransaction() {
   const { addTransaction } = useTransactionsContext()
   const { accounts } = useAccountsContext()
 
-  const accountId = searchParams.get("accountId")
+  const accountIdFromUrl =
+    searchParams.get("accountId")
+
+  const initialAccountId =
+    accountIdFromUrl &&
+    accounts.some(
+      (account) => account.id === accountIdFromUrl,
+    )
+      ? accountIdFromUrl
+      : ""
 
   const selectedAccount = accounts.find(
-    (account) => account.id === accountId,
+    (account) => account.id === initialAccountId,
   )
 
-  const [description, setDescription] = useState("")
-  const [amount, setAmount] = useState("")
-  const [type, setType] = useState<
-    "income" | "expense"
-  >("expense")
-  const [category, setCategory] = useState("Food")
+  const [description, setDescription] =
+    useState("")
+
+  const [amount, setAmount] =
+    useState("")
+
+  const [type, setType] =
+    useState<TransactionType>("expense")
+
+  const [category, setCategory] =
+    useState("Food")
+
   const [date, setDate] = useState(
     new Date().toISOString().split("T")[0],
   )
 
   const [selectedAccountId, setSelectedAccountId] =
-    useState(accountId ?? "")
+    useState(initialAccountId)
 
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState("")
+  const [submitting, setSubmitting] =
+    useState(false)
+
+  const [error, setError] =
+    useState("")
 
   const handleSubmit = async (
     event: FormEvent<HTMLFormElement>,
@@ -54,16 +75,22 @@ function AddTransaction() {
 
     setError("")
 
+    const trimmedDescription =
+      description.trim()
+
     const numericAmount = Number(amount)
 
-    if (!description.trim()) {
+    if (!trimmedDescription) {
       setError(
         "Please enter a transaction description.",
       )
       return
     }
 
-    if (!numericAmount || numericAmount <= 0) {
+    if (
+      !Number.isFinite(numericAmount) ||
+      numericAmount <= 0
+    ) {
       setError("Please enter a valid amount.")
       return
     }
@@ -78,11 +105,23 @@ function AddTransaction() {
       return
     }
 
+    const accountExists = accounts.some(
+      (account) =>
+        account.id === selectedAccountId,
+    )
+
+    if (!accountExists) {
+      setError(
+        "The selected account could not be found.",
+      )
+      return
+    }
+
     try {
       setSubmitting(true)
 
       await addTransaction({
-        description: description.trim(),
+        description: trimmedDescription,
         amount: numericAmount,
         type,
         category,
@@ -102,15 +141,15 @@ function AddTransaction() {
     }
   }
 
+  const backPath = selectedAccountId
+    ? `/accounts/${selectedAccountId}`
+    : "/transactions"
+
   return (
     <div>
       <header>
         <Link
-          to={
-            selectedAccountId
-              ? `/accounts/${selectedAccountId}`
-              : "/transactions"
-          }
+          to={backPath}
           className="text-sm font-medium text-[var(--text-secondary)] transition hover:text-[var(--text-primary)]"
         >
           ←{" "}
@@ -128,7 +167,7 @@ function AddTransaction() {
         </p>
       </header>
 
-      <section className="mt-8 max-w-3xl rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
+      <section className="mt-8 max-w-3xl rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
         <form
           onSubmit={handleSubmit}
           className="space-y-6"
@@ -210,9 +249,7 @@ function AddTransaction() {
                 value={type}
                 onChange={(event) =>
                   setType(
-                    event.target.value as
-                      | "income"
-                      | "expense",
+                    event.target.value as TransactionType,
                   )
                 }
                 className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
@@ -300,11 +337,7 @@ function AddTransaction() {
 
           <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <Link
-              to={
-                selectedAccountId
-                  ? `/accounts/${selectedAccountId}`
-                  : "/transactions"
-              }
+              to={backPath}
               className="rounded-xl border border-[var(--border)] px-5 py-3 text-center text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
             >
               Cancel
@@ -328,7 +361,7 @@ function AddTransaction() {
 
 function formatCurrencyPreview(
   amount: number,
-  accountCurrency: string,
+  accountCurrency: Currency,
 ) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
