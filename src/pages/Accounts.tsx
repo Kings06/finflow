@@ -1,31 +1,30 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  CreditCard,
+  Hash,
+  Landmark,
   Pencil,
+  PiggyBank,
+  Plus,
   Trash2,
-  X,
+  TrendingUp,
   Wallet,
+  X,
+  type LucideIcon,
 } from "lucide-react"
 
-import {
-  useTransactionsContext,
-} from "../context/TransactionsContext"
-
-import {
-  useAccountsContext,
-} from "../context/AccountsContext"
-
-import {
-  usePreferences,
-} from "../context/PreferencesContext"
+import { useTransactionsContext } from "../context/TransactionsContext"
+import { useAccountsContext } from "../context/AccountsContext"
+import { usePreferences } from "../context/PreferencesContext"
 
 import {
   calculateFinancialSummary,
 } from "../utils/financial"
 
-import {
-  formatCurrency,
-} from "../utils/currency"
+import { formatCurrency } from "../utils/currency"
 
 import type {
   Account,
@@ -57,6 +56,17 @@ const accountTypes: {
     label: "Investment",
   },
 ]
+
+const accountTypeIcons: Record<
+  AccountType,
+  LucideIcon
+> = {
+  cash: Wallet,
+  checking: Landmark,
+  savings: PiggyBank,
+  credit: CreditCard,
+  investment: TrendingUp,
+}
 
 function getAccountTypeLabel(
   type: AccountType,
@@ -106,6 +116,64 @@ function Accounts() {
   const error =
     accountsError ?? transactionsError
 
+  const financialSummary =
+    useMemo(
+      () =>
+        calculateFinancialSummary(
+          transactions,
+        ),
+      [transactions],
+    )
+
+  /*
+   * Keep account balance behaviour exactly as it is.
+   * We do not calculate account balances from transactions.
+   * We also do not perform currency conversion.
+   */
+  const totalAccountBalance =
+    accounts.reduce(
+      (total, account) =>
+        total + account.balance,
+      0,
+    )
+
+  const recentTransactions =
+    useMemo(() => {
+      return [...transactions]
+        .sort((a, b) => {
+          const dateDifference =
+            new Date(b.date).getTime() -
+            new Date(a.date).getTime()
+
+          if (dateDifference !== 0) {
+            return dateDifference
+          }
+
+          return b.id - a.id
+        })
+        .slice(0, 5)
+    }, [transactions])
+
+  const getTransactionCurrency = (
+    transactionAccountId?: string,
+  ) => {
+    if (!transactionAccountId) {
+      return currency
+    }
+
+    const transactionAccount =
+      accounts.find(
+        (account) =>
+          account.id ===
+          transactionAccountId,
+      )
+
+    return (
+      transactionAccount?.currency ??
+      currency
+    )
+  }
+
   const startEditing = (
     account: Account,
   ) => {
@@ -124,12 +192,12 @@ function Accounts() {
     setEditBalance("")
   }
 
-  const handleUpdate = () => {
-    if (!editingAccountId) {
-      return
-    }
+  const handleUpdate = (
+    accountId: string,
+  ) => {
+    const trimmedName =
+      editName.trim()
 
-    const trimmedName = editName.trim()
     const numericBalance =
       Number(editBalance)
 
@@ -141,270 +209,343 @@ function Accounts() {
       return
     }
 
-    updateAccount(
-      editingAccountId,
-      {
-        name: trimmedName,
-        type: editType,
-        balance: numericBalance,
-      },
-    )
+    updateAccount(accountId, {
+      name: trimmedName,
+      type: editType,
+      balance: numericBalance,
+    })
 
     cancelEditing()
   }
 
   const handleDelete = (
-    accountId: string,
-    accountName: string,
+    account: Account,
   ) => {
     const confirmed = window.confirm(
-      `Are you sure you want to delete "${accountName}"? This action cannot be undone.`,
+      `Are you sure you want to delete "${account.name}"?`,
     )
 
     if (!confirmed) {
       return
     }
 
-    deleteAccount(accountId)
+    deleteAccount(account.id)
 
-    if (editingAccountId === accountId) {
+    if (
+      editingAccountId ===
+      account.id
+    ) {
       cancelEditing()
     }
   }
 
+  const getAccountTransactions = (
+    accountId: string,
+  ) => {
+    return transactions.filter(
+      (transaction) =>
+        transaction.accountId ===
+        accountId,
+    )
+  }
+
   if (loading) {
     return (
-      <div>
-        <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <main className="space-y-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-medium text-emerald-400">
-              Account management
-            </p>
-
-            <h1 className="mt-2 text-3xl font-bold text-[var(--text-primary)]">
-              Accounts
-            </h1>
-
-            <p className="mt-2 text-[var(--text-secondary)]">
-              Manage the accounts you use to
-              organize your money.
-            </p>
+            <div className="h-8 w-40 animate-pulse rounded-lg bg-[var(--surface-hover)]" />
+            <div className="mt-2 h-4 w-64 animate-pulse rounded bg-[var(--surface-hover)]" />
           </div>
 
-          <Link
-            to="/accounts/new"
-            className="inline-flex items-center justify-center rounded-xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400"
-          >
-            + Add Account
-          </Link>
-        </header>
-
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
-          {[1, 2, 3].map((item) => (
-            <div
-              key={item}
-              className="h-40 animate-pulse rounded-2xl border border-[var(--border)] bg-[var(--surface)]"
-            />
-          ))}
+          <div className="h-10 w-36 animate-pulse rounded-lg bg-[var(--surface-hover)]" />
         </div>
 
-        <div className="mt-8 grid gap-4 md:grid-cols-2">
-          {[1, 2].map((item) => (
-            <div
-              key={item}
-              className="h-64 animate-pulse rounded-2xl border border-[var(--border)] bg-[var(--surface)]"
-            />
-          ))}
-        </div>
-      </div>
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map(
+            (_, index) => (
+              <div
+                key={index}
+                className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5"
+              >
+                <div className="h-4 w-24 animate-pulse rounded bg-[var(--surface-hover)]" />
+                <div className="mt-4 h-8 w-32 animate-pulse rounded bg-[var(--surface-hover)]" />
+              </div>
+            ),
+          )}
+        </section>
+
+        <section className="grid gap-5 md:grid-cols-2">
+          {Array.from({ length: 4 }).map(
+            (_, index) => (
+              <div
+                key={index}
+                className="h-56 animate-pulse rounded-2xl border border-[var(--border)] bg-[var(--surface)]"
+              />
+            ),
+          )}
+        </section>
+      </main>
     )
   }
 
   if (error) {
     return (
-      <div>
-        <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <main className="space-y-8">
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-medium text-emerald-400">
-              Account management
-            </p>
-
-            <h1 className="mt-2 text-3xl font-bold text-[var(--text-primary)]">
+            <h1 className="text-2xl font-bold text-[var(--text-primary)]">
               Accounts
             </h1>
 
-            <p className="mt-2 text-[var(--text-secondary)]">
-              Manage the accounts you use to
-              organize your money.
+            <p className="mt-1 text-sm text-[var(--text-secondary)]">
+              Manage your financial accounts.
             </p>
           </div>
 
           <Link
             to="/accounts/new"
-            className="inline-flex items-center justify-center rounded-xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
           >
-            + Add Account
+            <Plus size={18} />
+            Add Account
           </Link>
         </header>
 
-        <div className="mt-8 rounded-2xl border border-red-500/20 bg-red-500/10 p-6">
-          <p className="text-sm font-semibold text-red-400">
-            Unable to load account data.
-          </p>
-
-          <p className="mt-2 text-sm text-red-400/80">
-            {error}
-          </p>
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+          {error}
         </div>
-      </div>
+      </main>
     )
   }
 
-  const summary =
-    calculateFinancialSummary(
-      transactions,
-    )
-
-  const totalAccountBalance =
-    accounts.reduce(
-      (total, account) =>
-        total + account.balance,
-      0,
-    )
-
-  const accountSummary = [
-    {
-      name: "Total Balance",
-      type: "Across all accounts",
-      amount: totalAccountBalance,
-      description: `${accounts.length} account${
-        accounts.length === 1
-          ? ""
-          : "s"
-      } connected`,
-      className:
-        totalAccountBalance >= 0
-          ? "text-emerald-400"
-          : "text-red-400",
-    },
-    {
-      name: "Income",
-      type: "Money Received",
-      amount: summary.totalIncome,
-      description:
-        "Total incoming funds",
-      className: "text-emerald-400",
-    },
-    {
-      name: "Expenses",
-      type: "Money Spent",
-      amount: summary.totalExpenses,
-      description:
-        "Total outgoing funds",
-      className: "text-red-400",
-    },
-  ]
-
   return (
-    <div>
+    <main className="space-y-8">
       {/* Page Header */}
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-medium text-emerald-400">
-            Account management
-          </p>
-
-          <h1 className="mt-2 text-3xl font-bold text-[var(--text-primary)]">
+          <h1 className="text-2xl font-bold text-[var(--text-primary)]">
             Accounts
           </h1>
 
-          <p className="mt-2 text-[var(--text-secondary)]">
-            Manage the accounts you use to
-            organize your money.
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">
+            Manage your accounts and keep track
+            of your financial activity.
           </p>
         </div>
 
         <Link
           to="/accounts/new"
-          className="inline-flex items-center justify-center rounded-xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-emerald-400 hover:shadow-md"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
         >
-          + Add Account
+          <Plus size={18} />
+          Add Account
         </Link>
       </header>
 
       {/* Summary */}
-      <section className="mt-8 grid gap-4 md:grid-cols-3">
-        {accountSummary.map((item) => (
-          <div
-            key={item.name}
-            className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm transition duration-200 hover:border-[var(--text-secondary)]"
-          >
-            <p className="text-sm text-[var(--text-secondary)]">
-              {item.type}
-            </p>
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-[var(--text-secondary)]">
+                Total Balance
+              </p>
 
-            <h2 className="mt-2 text-xl font-semibold text-[var(--text-primary)]">
-              {item.name}
-            </h2>
+              <p className="mt-2 text-2xl font-bold text-[var(--text-primary)]">
+                {formatCurrency(
+                  totalAccountBalance,
+                  currency,
+                )}
+              </p>
+            </div>
 
-            <p
-              className={`mt-8 text-3xl font-bold ${item.className}`}
-            >
-              {formatCurrency(
-                item.amount,
-                currency,
-              )}
-            </p>
-
-            <p className="mt-2 text-sm text-[var(--text-secondary)]">
-              {item.description}
-            </p>
+            <div className="rounded-xl bg-emerald-50 p-3 text-emerald-600">
+              <Wallet size={20} />
+            </div>
           </div>
-        ))}
-      </section>
 
-      {/* Accounts */}
-      <section className="mt-8">
-        <div className="mb-5">
-          <h2 className="text-xl font-semibold text-[var(--text-primary)]">
-            My Accounts
-          </h2>
-
-          <p className="mt-1 text-sm text-[var(--text-secondary)]">
-            Keep track of the accounts you
-            use to manage your money.
+          <p className="mt-3 text-xs text-[var(--text-muted)]">
+            Across {accounts.length}{" "}
+            {accounts.length === 1
+              ? "account"
+              : "accounts"}
           </p>
         </div>
 
-        {accounts.length > 0 ? (
-          <div className="grid gap-4 md:grid-cols-2">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-[var(--text-secondary)]">
+                Accounts
+              </p>
+
+              <p className="mt-2 text-2xl font-bold text-[var(--text-primary)]">
+                {accounts.length}
+              </p>
+            </div>
+
+            <div className="rounded-xl bg-slate-100 p-3 text-slate-600">
+              <Hash size={20} />
+            </div>
+          </div>
+
+          <p className="mt-3 text-xs text-[var(--text-muted)]">
+            Active financial accounts
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-[var(--text-secondary)]">
+                Income
+              </p>
+
+              <p className="mt-2 text-2xl font-bold text-emerald-600">
+                {formatCurrency(
+                  financialSummary.totalIncome,
+                  currency,
+                )}
+              </p>
+            </div>
+
+            <div className="rounded-xl bg-emerald-50 p-3 text-emerald-600">
+              <ArrowDownLeft size={20} />
+            </div>
+          </div>
+
+          <p className="mt-3 text-xs text-[var(--text-muted)]">
+            Total recorded income
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-[var(--text-secondary)]">
+                Expenses
+              </p>
+
+              <p className="mt-2 text-2xl font-bold text-red-600">
+                {formatCurrency(
+                  financialSummary.totalExpenses,
+                  currency,
+                )}
+              </p>
+            </div>
+
+            <div className="rounded-xl bg-red-50 p-3 text-red-600">
+              <ArrowUpRight size={20} />
+            </div>
+          </div>
+
+          <p className="mt-3 text-xs text-[var(--text-muted)]">
+            Total recorded expenses
+          </p>
+        </div>
+      </section>
+
+      {/* Accounts */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">
+              Your Accounts
+            </h2>
+
+            <p className="mt-1 text-sm text-[var(--text-secondary)]">
+              View balances and activity for
+              each account.
+            </p>
+          </div>
+        </div>
+
+        {accounts.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)] px-6 py-12 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+              <Wallet size={26} />
+            </div>
+
+            <h3 className="mt-4 text-lg font-semibold text-[var(--text-primary)]">
+              No accounts yet
+            </h3>
+
+            <p className="mx-auto mt-2 max-w-md text-sm text-[var(--text-secondary)]">
+              Add your first account to start
+              organizing your finances and
+              tracking your financial activity.
+            </p>
+
+            <Link
+              to="/accounts/new"
+              className="mt-5 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
+            >
+              <Plus size={18} />
+              Add Your First Account
+            </Link>
+          </div>
+        ) : (
+          <div className="grid gap-5 md:grid-cols-2">
             {accounts.map((account) => {
+              const Icon =
+                accountTypeIcons[
+                  account.type
+                ]
+
+              const accountTransactions =
+                getAccountTransactions(
+                  account.id,
+                )
+
+              const accountIncome =
+                accountTransactions
+                  .filter(
+                    (transaction) =>
+                      transaction.type ===
+                      "income",
+                  )
+                  .reduce(
+                    (total, transaction) =>
+                      total +
+                      transaction.amount,
+                    0,
+                  )
+
+              const accountExpenses =
+                accountTransactions
+                  .filter(
+                    (transaction) =>
+                      transaction.type ===
+                      "expense",
+                  )
+                  .reduce(
+                    (total, transaction) =>
+                      total +
+                      transaction.amount,
+                    0,
+                  )
+
               const isEditing =
                 editingAccountId ===
                 account.id
 
-              const accountTypeLabel =
-                getAccountTypeLabel(
-                  account.type,
-                )
-
               return (
                 <article
                   key={account.id}
-                  className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] transition duration-200 hover:border-[var(--text-secondary)]"
+                  className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm transition hover:border-[var(--border-hover)] hover:shadow-md"
                 >
                   {isEditing ? (
-                    <div className="p-6">
-                      <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-5">
+                      <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-lg font-semibold text-[var(--text-primary)]">
-                            Edit account
+                          <h3 className="font-semibold text-[var(--text-primary)]">
+                            Edit Account
                           </h3>
 
-                          <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                            Update this
-                            account's
-                            details.
+                          <p className="mt-1 text-xs text-[var(--text-secondary)]">
+                            Update your account
+                            information.
                           </p>
                         </div>
 
@@ -420,17 +561,18 @@ function Accounts() {
                         </button>
                       </div>
 
-                      <div className="mt-6 grid gap-4">
+                      <div className="space-y-4">
                         <div>
                           <label
                             htmlFor={`account-name-${account.id}`}
-                            className="text-sm font-medium text-[var(--text-secondary)]"
+                            className="mb-1.5 block text-sm font-medium text-[var(--text-primary)]"
                           >
                             Account name
                           </label>
 
                           <input
                             id={`account-name-${account.id}`}
+                            type="text"
                             value={editName}
                             onChange={(event) =>
                               setEditName(
@@ -438,8 +580,7 @@ function Accounts() {
                                   .value,
                               )
                             }
-                            maxLength={60}
-                            className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-[var(--text-primary)] outline-none transition placeholder:text-[var(--text-secondary)] focus:border-emerald-400"
+                            className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
                           />
                         </div>
 
@@ -447,7 +588,7 @@ function Accounts() {
                           <div>
                             <label
                               htmlFor={`account-type-${account.id}`}
-                              className="text-sm font-medium text-[var(--text-secondary)]"
+                              className="mb-1.5 block text-sm font-medium text-[var(--text-primary)]"
                             >
                               Account type
                             </label>
@@ -455,16 +596,20 @@ function Accounts() {
                             <select
                               id={`account-type-${account.id}`}
                               value={editType}
-                              onChange={(event) =>
+                              onChange={(
+                                event,
+                              ) =>
                                 setEditType(
                                   event.target
                                     .value as AccountType,
                                 )
                               }
-                              className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-emerald-400"
+                              className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
                             >
                               {accountTypes.map(
-                                (type) => (
+                                (
+                                  type,
+                                ) => (
                                   <option
                                     key={
                                       type.value
@@ -485,7 +630,7 @@ function Accounts() {
                           <div>
                             <label
                               htmlFor={`account-balance-${account.id}`}
-                              className="text-sm font-medium text-[var(--text-secondary)]"
+                              className="mb-1.5 block text-sm font-medium text-[var(--text-primary)]"
                             >
                               Balance
                             </label>
@@ -497,131 +642,160 @@ function Accounts() {
                               value={
                                 editBalance
                               }
-                              onChange={(event) =>
+                              onChange={(
+                                event,
+                              ) =>
                                 setEditBalance(
                                   event.target
                                     .value,
                                 )
                               }
-                              className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-[var(--text-primary)] outline-none transition focus:border-emerald-400"
+                              className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
                             />
                           </div>
                         </div>
-                      </div>
 
-                      <div className="mt-6 flex flex-wrap justify-end gap-3">
-                        <button
-                          type="button"
-                          onClick={
-                            cancelEditing
-                          }
-                          className="rounded-xl border border-[var(--border)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
-                        >
-                          Cancel
-                        </button>
+                        <div className="flex flex-wrap items-center gap-3 pt-1">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleUpdate(
+                                account.id,
+                              )
+                            }
+                            className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                          >
+                            Save Changes
+                          </button>
 
-                        <button
-                          type="button"
-                          onClick={
-                            handleUpdate
-                          }
-                          disabled={
-                            !editName.trim() ||
-                            !Number.isFinite(
-                              Number(
-                                editBalance,
-                              ),
-                            )
-                          }
-                          className="rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          Save changes
-                        </button>
+                          <button
+                            type="button"
+                            onClick={
+                              cancelEditing
+                            }
+                            className="rounded-xl border border-[var(--border)] px-4 py-2.5 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+                          >
+                            Cancel
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ) : (
-                    <div className="p-6">
+                    <>
+                      {/* Account Header */}
                       <div className="flex items-start justify-between gap-4">
-                        <div className="flex min-w-0 items-center gap-4">
-                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400">
-                            <Wallet size={21} />
+                        <div className="flex min-w-0 items-center gap-3">
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                            <Icon size={21} />
                           </div>
 
                           <div className="min-w-0">
                             <Link
                               to={`/accounts/${account.id}`}
-                              className="block truncate text-lg font-semibold text-[var(--text-primary)] transition hover:text-emerald-400"
+                              className="block truncate font-semibold text-[var(--text-primary)] transition hover:text-emerald-600"
                             >
                               {account.name}
                             </Link>
 
-                            <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                              {
-                                accountTypeLabel
-                              }
+                            <p className="mt-0.5 text-sm text-[var(--text-secondary)]">
+                              {getAccountTypeLabel(
+                                account.type,
+                              )}
                             </p>
                           </div>
                         </div>
 
-                        <span className="shrink-0 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-400">
+                        <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
                           Active
                         </span>
                       </div>
 
-                      <Link
-                        to={`/accounts/${account.id}`}
-                        className="group mt-8 block"
-                      >
-                        <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-secondary)]">
+                      {/* Balance */}
+                      <div className="mt-6">
+                        <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">
                           Current balance
                         </p>
 
-                        <p
-                          className={`mt-2 text-3xl font-bold transition ${
-                            account.balance >=
-                            0
-                              ? "text-[var(--text-primary)] group-hover:text-emerald-400"
-                              : "text-red-400"
-                          }`}
-                        >
+                        <p className="mt-1 text-2xl font-bold tracking-tight text-[var(--text-primary)]">
                           {formatCurrency(
                             account.balance,
                             account.currency,
                           )}
                         </p>
-                      </Link>
 
-                      <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-[var(--border)] pt-4">
-                        <div>
-                          <p className="text-xs text-[var(--text-secondary)]">
-                            Currency
+                        <p className="mt-1 text-xs text-[var(--text-muted)]">
+                          Currency:{" "}
+                          {account.currency}
+                        </p>
+                      </div>
+
+                      {/* Activity */}
+                      <div className="mt-5 grid grid-cols-3 divide-x divide-[var(--border)] rounded-xl border border-[var(--border)] bg-[var(--surface-hover)]">
+                        <div className="px-3 py-3">
+                          <p className="text-xs text-[var(--text-muted)]">
+                            Transactions
                           </p>
 
-                          <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">
+                          <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">
                             {
-                              account.currency
+                              accountTransactions.length
                             }
                           </p>
                         </div>
 
-                        <div>
-                          <p className="text-xs text-[var(--text-secondary)]">
-                            Added
+                        <div className="px-3 py-3">
+                          <p className="text-xs text-[var(--text-muted)]">
+                            Income
                           </p>
 
-                          <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">
+                          <p className="mt-1 truncate text-sm font-semibold text-emerald-600">
+                            {formatCurrency(
+                              accountIncome,
+                              account.currency,
+                            )}
+                          </p>
+                        </div>
+
+                        <div className="px-3 py-3">
+                          <p className="text-xs text-[var(--text-muted)]">
+                            Expenses
+                          </p>
+
+                          <p className="mt-1 truncate text-sm font-semibold text-red-600">
+                            {formatCurrency(
+                              accountExpenses,
+                              account.currency,
+                            )}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Footer */}
+                      <div className="mt-5 flex flex-col gap-4 border-t border-[var(--border)] pt-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                          <p className="text-xs text-[var(--text-muted)]">
+                            Created{" "}
                             {new Date(
                               account.createdAt,
                             ).toLocaleDateString(
-                              "en-US",
+                              undefined,
                               {
                                 month:
                                   "short",
                                 day: "numeric",
-                                year: "numeric",
+                                year:
+                                  "numeric",
                               },
                             )}
                           </p>
+
+                          {accountTransactions.length ===
+                            0 && (
+                            <p className="mt-1 text-xs text-[var(--text-muted)]">
+                              No linked activity
+                              yet.
+                            </p>
+                          )}
                         </div>
 
                         <div className="flex items-center gap-2">
@@ -632,172 +806,206 @@ function Accounts() {
                                 account,
                               )
                             }
-                            className="rounded-xl border border-[var(--border)] p-2.5 text-[var(--text-secondary)] transition hover:border-emerald-400/40 hover:bg-emerald-500/10 hover:text-emerald-400"
-                            aria-label={`Edit ${account.name}`}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-2 text-xs font-medium text-[var(--text-secondary)] transition hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
                           >
-                            <Pencil
-                              size={17}
-                            />
+                            <Pencil size={14} />
+                            Edit
                           </button>
 
                           <button
                             type="button"
                             onClick={() =>
                               handleDelete(
-                                account.id,
-                                account.name,
+                                account,
                               )
                             }
-                            className="rounded-xl border border-[var(--border)] p-2.5 text-[var(--text-secondary)] transition hover:border-red-400/40 hover:bg-red-500/10 hover:text-red-400"
-                            aria-label={`Delete ${account.name}`}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-2 text-xs font-medium text-red-600 transition hover:bg-red-50"
                           >
-                            <Trash2
-                              size={17}
-                            />
+                            <Trash2 size={14} />
+                            Delete
                           </button>
                         </div>
                       </div>
-                    </div>
+                    </>
                   )}
                 </article>
               )
             })}
           </div>
-        ) : (
-          <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)] p-10 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400">
-              <Wallet size={22} />
-            </div>
-
-            <p className="mt-4 font-medium text-[var(--text-primary)]">
-              No accounts added yet
-            </p>
-
-            <p className="mx-auto mt-2 max-w-md text-sm text-[var(--text-secondary)]">
-              Add an account to start
-              organizing your money across
-              FinFlow.
-            </p>
-
-            <Link
-              to="/accounts/new"
-              className="mt-5 inline-flex items-center justify-center rounded-xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400"
-            >
-              + Add Account
-            </Link>
-          </div>
         )}
       </section>
 
       {/* Connected Accounts */}
-      <section className="mt-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
-        <h2 className="text-xl font-semibold text-[var(--text-primary)]">
-          Connected Accounts
-        </h2>
+      <section className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)] p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="font-semibold text-[var(--text-primary)]">
+              Connected Accounts
+            </h2>
 
-        <p className="mt-1 text-sm text-[var(--text-secondary)]">
-          Your financial data is currently
-          being managed through FinFlow.
-        </p>
+            <p className="mt-1 max-w-2xl text-sm text-[var(--text-secondary)]">
+              Bank connections and automatic
+              account synchronization will be
+              available here in a future update.
+            </p>
+          </div>
 
-        <div className="mt-6 rounded-xl border border-dashed border-[var(--border)] p-6 text-center">
-          <p className="font-medium text-[var(--text-primary)]">
-            No external accounts
-            connected
-          </p>
-
-          <p className="mt-2 text-sm text-[var(--text-secondary)]">
-            Bank account connections can
-            be added here in a future
-            integration.
-          </p>
+          <span className="w-fit rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600">
+            Coming soon
+          </span>
         </div>
       </section>
 
       {/* Recent Activity */}
-      <section className="mt-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <section className="space-y-4">
+        <div className="flex items-end justify-between gap-4">
           <div>
-            <h2 className="text-xl font-semibold text-[var(--text-primary)]">
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">
               Recent Activity
             </h2>
 
             <p className="mt-1 text-sm text-[var(--text-secondary)]">
-              Your latest account
-              transactions.
+              Your latest recorded financial
+              activity.
             </p>
           </div>
 
-          <Link
-            to="/transactions"
-            className="text-sm font-medium text-emerald-400 transition hover:text-emerald-300"
-          >
-            View all
-          </Link>
-        </div>
-
-        <div className="mt-6 space-y-3">
-          {transactions
-            .slice(0, 5)
-            .map((transaction) => (
-              <Link
-                key={transaction.id}
-                to={`/transactions/${transaction.id}`}
-                className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--background)] p-4 transition hover:border-[var(--text-secondary)]"
-              >
-                <div className="min-w-0">
-                  <p className="truncate font-medium text-[var(--text-primary)]">
-                    {
-                      transaction.description
-                    }
-                  </p>
-
-                  <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                    {
-                      transaction.category
-                    }{" "}
-                    ·{" "}
-                    {new Date(
-                      transaction.date,
-                    ).toLocaleDateString(
-                      "en-US",
-                      {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      },
-                    )}
-                  </p>
-                </div>
-
-                <p
-                  className={`ml-4 shrink-0 font-semibold ${
-                    transaction.type ===
-                    "income"
-                      ? "text-emerald-400"
-                      : "text-red-400"
-                  }`}
-                >
-                  {transaction.type ===
-                  "income"
-                    ? "+"
-                    : "-"}
-                  {formatCurrency(
-                    transaction.amount,
-                    currency,
-                  )}
-                </p>
-              </Link>
-            ))}
-
-          {transactions.length === 0 && (
-            <p className="py-6 text-center text-sm text-[var(--text-secondary)]">
-              No account activity yet.
-            </p>
+          {transactions.length > 0 && (
+            <Link
+              to="/transactions"
+              className="shrink-0 text-sm font-medium text-emerald-600 transition hover:text-emerald-700"
+            >
+              View all
+            </Link>
           )}
         </div>
+
+        {recentTransactions.length === 0 ? (
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-6 py-10 text-center">
+            <p className="text-sm text-[var(--text-secondary)]">
+              No recent activity yet.
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
+            <div className="divide-y divide-[var(--border)]">
+              {recentTransactions.map(
+                (transaction) => {
+                  const transactionAccount =
+                    transaction.accountId
+                      ? accounts.find(
+                          (account) =>
+                            account.id ===
+                            transaction.accountId,
+                        )
+                      : undefined
+
+                  const transactionCurrency =
+                    getTransactionCurrency(
+                      transaction.accountId,
+                    )
+
+                  const isIncome =
+                    transaction.type ===
+                    "income"
+
+                  return (
+                    <Link
+                      key={transaction.id}
+                      to={`/transactions/${transaction.id}`}
+                      className="flex items-center gap-3 px-4 py-4 transition hover:bg-[var(--surface-hover)] sm:px-5"
+                    >
+                      <div
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+                          isIncome
+                            ? "bg-emerald-50 text-emerald-600"
+                            : "bg-red-50 text-red-600"
+                        }`}
+                      >
+                        {isIncome ? (
+                          <ArrowDownLeft
+                            size={18}
+                          />
+                        ) : (
+                          <ArrowUpRight
+                            size={18}
+                          />
+                        )}
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-[var(--text-primary)]">
+                          {
+                            transaction.description
+                          }
+                        </p>
+
+                        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[var(--text-muted)]">
+                          <span>
+                            {
+                              transaction.category
+                            }
+                          </span>
+
+                          <span>
+                            •
+                          </span>
+
+                          <span>
+                            {new Date(
+                              transaction.date,
+                            ).toLocaleDateString(
+                              undefined,
+                              {
+                                month:
+                                  "short",
+                                day: "numeric",
+                                year:
+                                  "numeric",
+                              },
+                            )}
+                          </span>
+
+                          {transactionAccount && (
+                            <>
+                              <span>
+                                •
+                              </span>
+
+                              <span className="truncate">
+                                {
+                                  transactionAccount.name
+                                }
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      <p
+                        className={`shrink-0 text-sm font-semibold ${
+                          isIncome
+                            ? "text-emerald-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        {isIncome
+                          ? "+"
+                          : "-"}
+                        {formatCurrency(
+                          transaction.amount,
+                          transactionCurrency,
+                        )}
+                      </p>
+                    </Link>
+                  )
+                },
+              )}
+            </div>
+          </div>
+        )}
       </section>
-    </div>
+    </main>
   )
 }
 
