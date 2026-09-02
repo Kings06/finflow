@@ -7,8 +7,12 @@ import TransactionList from "../components/TransactionList"
 import RecurringExpenses from "../components/RecurringExpenses"
 import SafeToSpendCard from "../components/SafeToSpendCard"
 import CashFlowForecast from "../components/CashFlowForecast"
+import { useTransactionsContext } from "../context/TransactionsContext"
+
+
 
 function Dashboard() {
+    const { transactions } = useTransactionsContext()
   return (
     <div>
       <Header />
@@ -21,7 +25,7 @@ function Dashboard() {
 
       <div className="mt-10 grid gap-8 xl:grid-cols-3">
         <div className="xl:col-span-2">
-          <FinancialChart />
+          <FinancialChart transactions={transactions} />
         </div>
 
         <div>

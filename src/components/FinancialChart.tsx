@@ -10,203 +10,62 @@ import {
   YAxis,
 } from "recharts"
 
-import { useTransactionsContext } from "../context/TransactionsContext"
+import type { Transaction } from "../types/transaction"
 import { buildFinancialChartData } from "../utils/chart"
 import { formatCurrency } from "../utils/currency"
 
-function FinancialChart() {
-  const { transactions, loading, error } =
-    useTransactionsContext()
+type FinancialChartProps = {
+  transactions: Transaction[]
+}
 
+function FinancialChart({
+  transactions,
+}: FinancialChartProps) {
   const chartData = useMemo(
-    () => buildFinancialChartData(transactions),
+    () =>
+      buildFinancialChartData(transactions),
     [transactions],
   )
 
-  if (loading) {
-    return (
-      <section
-        className="mt-8 overflow-hidden rounded-2xl border"
-        style={{
-          borderColor: "var(--border)",
-          backgroundColor: "var(--surface)",
-        }}
-      >
-        <div className="p-6">
-          <div
-            className="h-6 w-48 animate-pulse rounded-lg"
-            style={{
-              backgroundColor: "var(--surface-hover)",
-            }}
-          />
-
-          <div
-            className="mt-2 h-4 w-72 max-w-full animate-pulse rounded-lg"
-            style={{
-              backgroundColor: "var(--surface-hover)",
-            }}
-          />
-        </div>
-
-        <div
-          className="h-80 animate-pulse"
-          style={{
-            backgroundColor:
-              "rgba(148, 163, 184, 0.08)",
-          }}
-        />
-      </section>
-    )
-  }
-
-  if (error) {
-    return (
-      <section
-        className="mt-8 rounded-2xl border p-6"
-        style={{
-          borderColor: "rgba(239, 68, 68, 0.2)",
-          backgroundColor: "rgba(239, 68, 68, 0.1)",
-        }}
-      >
-        <p className="font-medium text-red-400">
-          Unable to load financial chart
-        </p>
-
-        <p className="mt-2 text-sm text-red-400/80">
-          {error}
-        </p>
-      </section>
-    )
-  }
-
   if (chartData.length === 0) {
     return (
-      <section
-        className="mt-8 rounded-2xl border p-6"
-        style={{
-          borderColor: "var(--border)",
-          backgroundColor: "var(--surface)",
-        }}
-      >
-        <div>
-          <p className="text-sm font-medium text-emerald-500">
-            Financial trends
-          </p>
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
+        <h2 className="font-semibold text-[var(--text-primary)]">
+          Financial Trends
+        </h2>
 
-          <h2
-            className="mt-1 text-xl font-semibold"
-            style={{
-              color: "var(--text-primary)",
-            }}
-          >
-            Financial Overview
-          </h2>
-
-          <p
-            className="mt-1 text-sm"
-            style={{
-              color: "var(--text-secondary)",
-            }}
-          >
-            Track your income and expenses over time.
+        <div className="flex min-h-[320px] items-center justify-center">
+          <p className="text-sm text-[var(--text-muted)]">
+            No financial data available for this
+            period.
           </p>
         </div>
-
-        <div
-          className="mt-8 flex min-h-70 flex-col items-center justify-center rounded-xl border border-dashed px-6 text-center"
-          style={{
-            borderColor: "var(--border)",
-          }}
-        >
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-xl text-emerald-500">
-            ₦
-          </div>
-
-          <p
-            className="mt-4 font-medium"
-            style={{
-              color: "var(--text-primary)",
-            }}
-          >
-            No financial data yet
-          </p>
-
-          <p
-            className="mt-2 max-w-sm text-sm"
-            style={{
-              color: "var(--text-secondary)",
-            }}
-          >
-            Add some transactions to see your income
-            and expenses visualized here.
-          </p>
-        </div>
-      </section>
+      </div>
     )
   }
 
   return (
-    <section
-      className="mt-8 overflow-hidden rounded-2xl border transition duration-200"
-      style={{
-        borderColor: "var(--border)",
-        backgroundColor: "var(--surface)",
-      }}
-      onMouseEnter={(event) => {
-        event.currentTarget.style.borderColor =
-          "var(--text-secondary)"
-      }}
-      onMouseLeave={(event) => {
-        event.currentTarget.style.borderColor =
-          "var(--border)"
-      }}
-    >
-      <div
-        className="border-b p-6"
-        style={{
-          borderColor: "var(--border)",
-        }}
-      >
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-sm font-medium text-emerald-500">
-              Financial trends
-            </p>
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="font-semibold text-[var(--text-primary)]">
+            Financial Trends
+          </h2>
 
-            <h2
-              className="mt-1 text-xl font-semibold tracking-tight"
-              style={{
-                color: "var(--text-primary)",
-              }}
-            >
-              Financial Overview
-            </h2>
-
-            <p
-              className="mt-1 text-sm"
-              style={{
-                color: "var(--text-secondary)",
-              }}
-            >
-              Track your income and expenses over time.
-            </p>
-          </div>
-
-          <p
-            className="text-sm"
-            style={{
-              color: "var(--text-muted)",
-            }}
-          >
-            {chartData.length}{" "}
-            {chartData.length === 1
-              ? "period"
-              : "periods"}
+          <p className="text-sm text-[var(--text-secondary)]">
+            Income and expenses over time
           </p>
         </div>
+
+        <span className="text-xs text-[var(--text-muted)]">
+          {chartData.length}{" "}
+          {chartData.length === 1
+            ? "period"
+            : "periods"}
+        </span>
       </div>
 
-      <div className="h-80 w-full p-4 sm:h-90 sm:p-6">
+      <div className="mt-6 h-[360px] w-full">
         <ResponsiveContainer
           width="100%"
           height="100%"
@@ -214,116 +73,104 @@ function FinancialChart() {
           <BarChart
             data={chartData}
             margin={{
-              top: 8,
-              right: 8,
+              top: 10,
+              right: 10,
               left: 0,
-              bottom: 8,
+              bottom: 10,
             }}
           >
             <CartesianGrid
-              stroke="var(--border)"
               strokeDasharray="3 3"
               vertical={false}
+              stroke="var(--border)"
             />
 
             <XAxis
               dataKey="date"
-              tickFormatter={(value: string | number) => {
-                const date = new Date(value)
-
-                if (Number.isNaN(date.getTime())) {
-                  return String(value)
-                }
-
-                return date.toLocaleDateString(
-                  "en-US",
+              tickFormatter={(date) =>
+                new Date(date).toLocaleDateString(
+                  "en-NG",
                   {
-                    month: "short",
                     day: "numeric",
+                    month: "short",
                   },
                 )
-              }}
+              }
               tick={{
-                fontSize: 12,
                 fill: "var(--text-muted)",
+                fontSize: 12,
               }}
-              tickLine={false}
               axisLine={false}
+              tickLine={false}
             />
 
             <YAxis
-              tickFormatter={(value: string | number) =>
-                formatCurrency(Number(value))
+              tickFormatter={(value) =>
+                formatCurrency(value)
               }
               tick={{
-                fontSize: 12,
                 fill: "var(--text-muted)",
+                fontSize: 12,
               }}
-              tickLine={false}
               axisLine={false}
-              width={70}
+              tickLine={false}
+              width={80}
             />
 
             <Tooltip
-  formatter={(value) => formatCurrency(Number(value))}
-  labelFormatter={(value) => {
-    const date = new Date(String(value))
-
-    if (Number.isNaN(date.getTime())) {
-      return String(value)
-    }
-
-    return date.toLocaleDateString("en-US", {
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    })
-  }}
-  contentStyle={{
-    backgroundColor: "var(--surface)",
-    border: "1px solid var(--border)",
-    borderRadius: "12px",
-    boxShadow:
-      "0 10px 30px rgba(0, 0, 0, 0.15)",
-  }}
-  labelStyle={{
-    color: "var(--text-secondary)",
-    marginBottom: "6px",
-  }}
-  itemStyle={{
-    color: "var(--text-primary)",
-  }}
-/>
+              formatter={(value, name) => [
+                formatCurrency(Number(value)),
+                name === "income"
+                  ? "Income"
+                  : "Expenses",
+              ]}
+              labelFormatter={(date) =>
+                new Date(
+                  String(date),
+                ).toLocaleDateString("en-NG", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })
+              }
+              contentStyle={{
+                borderRadius: "12px",
+                border:
+                  "1px solid var(--border)",
+                background:
+                  "var(--surface)",
+                color:
+                  "var(--text-primary)",
+              }}
+            />
 
             <Legend
-              verticalAlign="bottom"
-              height={32}
-              iconType="circle"
-              wrapperStyle={{
-                fontSize: "12px",
-                color: "var(--text-secondary)",
-              }}
+              formatter={(value) =>
+                value === "income"
+                  ? "Income"
+                  : "Expenses"
+              }
             />
 
             <Bar
               dataKey="income"
-              name="Income"
-              fill="#34d399"
-              radius={[6, 6, 0, 0]}
-              maxBarSize={42}
+              name="income"
+              fill="#10b981"
+              radius={[4, 4, 0, 0]}
+              maxBarSize={32}
             />
 
             <Bar
               dataKey="expenses"
-              name="Expenses"
-              fill="#f87171"
-              radius={[6, 6, 0, 0]}
-              maxBarSize={42}
+              name="expenses"
+              fill="#ef4444"
+              radius={[4, 4, 0, 0]}
+              maxBarSize={32}
             />
           </BarChart>
         </ResponsiveContainer>
       </div>
-    </section>
+    </div>
   )
 }
 
