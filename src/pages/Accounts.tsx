@@ -486,352 +486,304 @@ function Accounts() {
             </Link>
           </div>
         ) : (
-          <div className="grid gap-5 md:grid-cols-2">
-            {accounts.map((account) => {
-              const Icon =
-                accountTypeIcons[
-                  account.type
-                ]
+          <div className="grid gap-4 md:grid-cols-2">
+  {accounts.map((account) => {
+    const Icon = accountTypeIcons[account.type]
 
-              const accountTransactions =
-                getAccountTransactions(
-                  account.id,
-                )
+    const accountTransactions =
+      getAccountTransactions(account.id)
 
-              const accountIncome =
-                accountTransactions
-                  .filter(
-                    (transaction) =>
-                      transaction.type ===
-                      "income",
-                  )
-                  .reduce(
-                    (total, transaction) =>
-                      total +
-                      transaction.amount,
-                    0,
-                  )
+    const accountIncome =
+      accountTransactions
+        .filter(
+          (transaction) =>
+            transaction.type === "income",
+        )
+        .reduce(
+          (total, transaction) =>
+            total + transaction.amount,
+          0,
+        )
 
-              const accountExpenses =
-                accountTransactions
-                  .filter(
-                    (transaction) =>
-                      transaction.type ===
-                      "expense",
-                  )
-                  .reduce(
-                    (total, transaction) =>
-                      total +
-                      transaction.amount,
-                    0,
-                  )
+    const accountExpenses =
+      accountTransactions
+        .filter(
+          (transaction) =>
+            transaction.type === "expense",
+        )
+        .reduce(
+          (total, transaction) =>
+            total + transaction.amount,
+          0,
+        )
 
-              const isEditing =
-                editingAccountId ===
-                account.id
+    const isEditing =
+      editingAccountId === account.id
 
-              return (
-                <article
-                  key={account.id}
-                  className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm transition hover:border-[var(--border-hover)] hover:shadow-md"
+    if (isEditing) {
+      return (
+        <article
+          key={account.id}
+          className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-sm"
+        >
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold text-[var(--text-primary)]">
+                  Edit Account
+                </h3>
+
+                <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
+                  Update your account information.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={cancelEditing}
+                className="rounded-lg p-2 text-[var(--text-secondary)] transition hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+                aria-label="Cancel editing"
+              >
+                <X size={17} />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label
+                  htmlFor={`account-name-${account.id}`}
+                  className="mb-1.5 block text-xs font-medium text-[var(--text-primary)]"
                 >
-                  {isEditing ? (
-                    <div className="space-y-5">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-semibold text-[var(--text-primary)]">
-                            Edit Account
-                          </h3>
+                  Account name
+                </label>
 
-                          <p className="mt-1 text-xs text-[var(--text-secondary)]">
-                            Update your account
-                            information.
-                          </p>
-                        </div>
+                <input
+                  id={`account-name-${account.id}`}
+                  type="text"
+                  value={editName}
+                  onChange={(event) =>
+                    setEditName(event.target.value)
+                  }
+                  className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
+                />
+              </div>
 
-                        <button
-                          type="button"
-                          onClick={
-                            cancelEditing
-                          }
-                          className="rounded-lg p-2 text-[var(--text-secondary)] transition hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
-                          aria-label="Cancel editing"
-                        >
-                          <X size={18} />
-                        </button>
-                      </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label
+                    htmlFor={`account-type-${account.id}`}
+                    className="mb-1.5 block text-xs font-medium text-[var(--text-primary)]"
+                  >
+                    Account type
+                  </label>
 
-                      <div className="space-y-4">
-                        <div>
-                          <label
-                            htmlFor={`account-name-${account.id}`}
-                            className="mb-1.5 block text-sm font-medium text-[var(--text-primary)]"
-                          >
-                            Account name
-                          </label>
+                  <select
+                    id={`account-type-${account.id}`}
+                    value={editType}
+                    onChange={(event) =>
+                      setEditType(
+                        event.target.value as AccountType,
+                      )
+                    }
+                    className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
+                  >
+                    {accountTypes.map((type) => (
+                      <option
+                        key={type.value}
+                        value={type.value}
+                      >
+                        {type.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-                          <input
-                            id={`account-name-${account.id}`}
-                            type="text"
-                            value={editName}
-                            onChange={(event) =>
-                              setEditName(
-                                event.target
-                                  .value,
-                              )
-                            }
-                            className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
-                          />
-                        </div>
+                <div>
+                  <label
+                    htmlFor={`account-balance-${account.id}`}
+                    className="mb-1.5 block text-xs font-medium text-[var(--text-primary)]"
+                  >
+                    Balance
+                  </label>
 
-                        <div className="grid gap-4 sm:grid-cols-2">
-                          <div>
-                            <label
-                              htmlFor={`account-type-${account.id}`}
-                              className="mb-1.5 block text-sm font-medium text-[var(--text-primary)]"
-                            >
-                              Account type
-                            </label>
+                  <input
+                    id={`account-balance-${account.id}`}
+                    type="number"
+                    step="0.01"
+                    value={editBalance}
+                    onChange={(event) =>
+                      setEditBalance(event.target.value)
+                    }
+                    className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
+                  />
+                </div>
+              </div>
 
-                            <select
-                              id={`account-type-${account.id}`}
-                              value={editType}
-                              onChange={(
-                                event,
-                              ) =>
-                                setEditType(
-                                  event.target
-                                    .value as AccountType,
-                                )
-                              }
-                              className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
-                            >
-                              {accountTypes.map(
-                                (
-                                  type,
-                                ) => (
-                                  <option
-                                    key={
-                                      type.value
-                                    }
-                                    value={
-                                      type.value
-                                    }
-                                  >
-                                    {
-                                      type.label
-                                    }
-                                  </option>
-                                ),
-                              )}
-                            </select>
-                          </div>
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleUpdate(account.id)
+                  }
+                  className="rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700"
+                >
+                  Save Changes
+                </button>
 
-                          <div>
-                            <label
-                              htmlFor={`account-balance-${account.id}`}
-                              className="mb-1.5 block text-sm font-medium text-[var(--text-primary)]"
-                            >
-                              Balance
-                            </label>
-
-                            <input
-                              id={`account-balance-${account.id}`}
-                              type="number"
-                              step="0.01"
-                              value={
-                                editBalance
-                              }
-                              onChange={(
-                                event,
-                              ) =>
-                                setEditBalance(
-                                  event.target
-                                    .value,
-                                )
-                              }
-                              className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="flex flex-wrap items-center gap-3 pt-1">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleUpdate(
-                                account.id,
-                              )
-                            }
-                            className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
-                          >
-                            Save Changes
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={
-                              cancelEditing
-                            }
-                            className="rounded-xl border border-[var(--border)] px-4 py-2.5 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      {/* Account Header */}
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex min-w-0 items-center gap-3">
-                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-                            <Icon size={21} />
-                          </div>
-
-                          <div className="min-w-0">
-                            <Link
-                              to={`/accounts/${account.id}`}
-                              className="block truncate font-semibold text-[var(--text-primary)] transition hover:text-emerald-600"
-                            >
-                              {account.name}
-                            </Link>
-
-                            <p className="mt-0.5 text-sm text-[var(--text-secondary)]">
-                              {getAccountTypeLabel(
-                                account.type,
-                              )}
-                            </p>
-                          </div>
-                        </div>
-
-                        <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
-                          Active
-                        </span>
-                      </div>
-
-                      {/* Balance */}
-                      <div className="mt-6">
-                        <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">
-                          Current balance
-                        </p>
-
-                        <p className="mt-1 text-2xl font-bold tracking-tight text-[var(--text-primary)]">
-                          {formatCurrency(
-                            account.balance,
-                            account.currency,
-                          )}
-                        </p>
-
-                        <p className="mt-1 text-xs text-[var(--text-muted)]">
-                          Currency:{" "}
-                          {account.currency}
-                        </p>
-                      </div>
-
-                      {/* Activity */}
-                      <div className="mt-5 grid grid-cols-3 divide-x divide-[var(--border)] rounded-xl border border-[var(--border)] bg-[var(--surface-hover)]">
-                        <div className="px-3 py-3">
-                          <p className="text-xs text-[var(--text-muted)]">
-                            Transactions
-                          </p>
-
-                          <p className="mt-1 text-sm font-semibold text-[var(--text-primary)]">
-                            {
-                              accountTransactions.length
-                            }
-                          </p>
-                        </div>
-
-                        <div className="px-3 py-3">
-                          <p className="text-xs text-[var(--text-muted)]">
-                            Income
-                          </p>
-
-                          <p className="mt-1 truncate text-sm font-semibold text-emerald-600">
-                            {formatCurrency(
-                              accountIncome,
-                              account.currency,
-                            )}
-                          </p>
-                        </div>
-
-                        <div className="px-3 py-3">
-                          <p className="text-xs text-[var(--text-muted)]">
-                            Expenses
-                          </p>
-
-                          <p className="mt-1 truncate text-sm font-semibold text-red-600">
-                            {formatCurrency(
-                              accountExpenses,
-                              account.currency,
-                            )}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Footer */}
-                      <div className="mt-5 flex flex-col gap-4 border-t border-[var(--border)] pt-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                          <p className="text-xs text-[var(--text-muted)]">
-                            Created{" "}
-                            {new Date(
-                              account.createdAt,
-                            ).toLocaleDateString(
-                              undefined,
-                              {
-                                month:
-                                  "short",
-                                day: "numeric",
-                                year:
-                                  "numeric",
-                              },
-                            )}
-                          </p>
-
-                          {accountTransactions.length ===
-                            0 && (
-                            <p className="mt-1 text-xs text-[var(--text-muted)]">
-                              No linked activity
-                              yet.
-                            </p>
-                          )}
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              startEditing(
-                                account,
-                              )
-                            }
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-2 text-xs font-medium text-[var(--text-secondary)] transition hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
-                          >
-                            <Pencil size={14} />
-                            Edit
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleDelete(
-                                account,
-                              )
-                            }
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-2 text-xs font-medium text-red-600 transition hover:bg-red-50"
-                          >
-                            <Trash2 size={14} />
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </article>
-              )
-            })}
+                <button
+                  type="button"
+                  onClick={cancelEditing}
+                  className="rounded-lg border border-[var(--border)] px-3.5 py-2 text-xs font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
+        </article>
+      )
+    }
+
+    return (
+      <Link
+        key={account.id}
+        to={`/accounts/${account.id}`}
+        className="group block rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+      >
+        {/* Account Header */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition group-hover:bg-emerald-100">
+              <Icon size={19} />
+            </div>
+
+            <div className="min-w-0">
+              <p className="truncate font-semibold text-[var(--text-primary)] group-hover:text-emerald-600">
+                {account.name}
+              </p>
+
+              <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
+                {getAccountTypeLabel(account.type)}
+              </p>
+            </div>
+          </div>
+
+          <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-1 text-[11px] font-medium text-emerald-700">
+            Active
+          </span>
+        </div>
+
+        {/* Balance */}
+        <div className="mt-4">
+          <p className="text-[11px] font-medium uppercase tracking-wide text-[var(--text-muted)]">
+            Current balance
+          </p>
+
+          <p className="mt-0.5 text-xl font-bold tracking-tight text-[var(--text-primary)]">
+            {formatCurrency(
+              account.balance,
+              account.currency,
+            )}
+          </p>
+
+          <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">
+            {account.currency}
+          </p>
+        </div>
+
+        {/* Activity Summary */}
+        <div className="mt-4 grid grid-cols-3 divide-x divide-[var(--border)] rounded-xl border border-[var(--border)] bg-[var(--surface-hover)]">
+          <div className="px-2.5 py-2.5">
+            <p className="text-[10px] text-[var(--text-muted)]">
+              Transactions
+            </p>
+
+            <p className="mt-0.5 text-sm font-semibold text-[var(--text-primary)]">
+              {accountTransactions.length}
+            </p>
+          </div>
+
+          <div className="px-2.5 py-2.5">
+            <p className="text-[10px] text-[var(--text-muted)]">
+              Income
+            </p>
+
+            <p className="mt-0.5 truncate text-xs font-semibold text-emerald-600">
+              {formatCurrency(
+                accountIncome,
+                account.currency,
+              )}
+            </p>
+          </div>
+
+          <div className="px-2.5 py-2.5">
+            <p className="text-[10px] text-[var(--text-muted)]">
+              Expenses
+            </p>
+
+            <p className="mt-0.5 truncate text-xs font-semibold text-red-600">
+              {formatCurrency(
+                accountExpenses,
+                account.currency,
+              )}
+            </p>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-3 flex items-center justify-between gap-3 border-t border-[var(--border)] pt-3">
+          <div className="min-w-0">
+            <p className="truncate text-[11px] text-[var(--text-muted)]">
+              Created{" "}
+              {new Date(
+                account.createdAt,
+              ).toLocaleDateString(undefined, {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </p>
+
+            {accountTransactions.length === 0 && (
+              <p className="mt-0.5 text-[10px] text-[var(--text-muted)]">
+                No linked activity yet
+              </p>
+            )}
+          </div>
+
+          {/* Card Actions */}
+          <div className="flex shrink-0 items-center gap-1.5">
+            <button
+              type="button"
+              onClick={(event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                startEditing(account)
+              }}
+              className="inline-flex items-center gap-1 rounded-lg border border-[var(--border)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--text-secondary)] transition hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]"
+            >
+              <Pencil size={12} />
+              Edit
+            </button>
+
+            <button
+              type="button"
+              onClick={(event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                handleDelete(account)
+              }}
+              className="inline-flex items-center gap-1 rounded-lg border border-red-200 px-2.5 py-1.5 text-[11px] font-medium text-red-600 transition hover:bg-red-50"
+            >
+              <Trash2 size={12} />
+              Delete
+            </button>
+          </div>
+        </div>
+      </Link>
+    )
+  })}
+</div>
         )}
       </section>
 
