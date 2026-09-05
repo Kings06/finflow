@@ -1,19 +1,24 @@
-import { Link, useNavigate, useParams } from "react-router-dom"
+import { useMemo } from "react"
 import {
+  ArrowDownRight,
   ArrowLeft,
   ArrowUpRight,
-  ArrowDownRight,
   CalendarDays,
   CreditCard,
+  Landmark,
   Pencil,
+  PiggyBank,
   Trash2,
+  TrendingUp,
   Wallet,
+  type LucideIcon,
 } from "lucide-react"
+import { Link, useNavigate, useParams } from "react-router-dom"
 
 import { useAccountsContext } from "../context/AccountsContext"
 import { useTransactionsContext } from "../context/TransactionsContext"
-import { formatCurrency } from "../utils/currency"
 import type { AccountType } from "../types/account"
+import { formatCurrency } from "../utils/currency"
 
 const accountTypeLabels: Record<AccountType, string> = {
   cash: "Cash",
@@ -23,109 +28,101 @@ const accountTypeLabels: Record<AccountType, string> = {
   investment: "Investment",
 }
 
+const accountTypeIcons: Record<AccountType, LucideIcon> = {
+  cash: Wallet,
+  checking: Landmark,
+  savings: PiggyBank,
+  credit: CreditCard,
+  investment: TrendingUp,
+}
+
+function formatDate(date: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(date))
+}
+
 function AccountDetails() {
-  const { id } = useParams()
+  const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
 
-  const { accounts, deleteAccount } = useAccountsContext()
-  const { transactions } = useTransactionsContext()
+  const {
+    accounts,
+    deleteAccount,
+    loading: accountsLoading,
+  } = useAccountsContext()
+
+  const {
+    transactions,
+    loading: transactionsLoading,
+  } = useTransactionsContext()
 
   const account = accounts.find(
-    (item) => item.id === id,
+    (currentAccount) => currentAccount.id === id,
   )
 
-  if (!account) {
-    return (
-      <div>
-        <Link
-          to="/accounts"
-          className="inline-flex items-center gap-2 text-sm font-medium text-(--text-secondary) transition hover:text-(--text-primary)"
-        >
-          <ArrowLeft size={17} />
-          Back to Accounts
-        </Link>
+  const accountTransactions = useMemo(() => {
+    if (!account) {
+      return []
+    }
 
-        <div className="mt-8 rounded-2xl border border-(--border) bg-(--surface) p-8 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-500/10 text-red-400">
-            <Wallet size={24} />
-          </div>
+    return transactions
+      .filter(
+        (transaction) =>
+          transaction.accountId === account.id,
+      )
+      .sort((a, b) => {
+        const dateDifference =
+          new Date(b.date).getTime() -
+          new Date(a.date).getTime()
 
-          <h1 className="mt-5 text-2xl font-bold text-(--text-primary)">
-            Account not found
-          </h1>
+        return dateDifference || b.id - a.id
+      })
+  }, [account, transactions])
 
-          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-(--text-secondary)">
-            This account may have been deleted or
-            may no longer exist.
-          </p>
-
-          <Link
-            to="/accounts"
-            className="mt-6 inline-flex items-center justify-center rounded-xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400"
-          >
-            Back to Accounts
-          </Link>
-        </div>
-      </div>
-    )
-  }
-
-  /*
-   * Only transactions belonging to this account.
-   */
-  const accountTransactions = transactions.filter(
-    (transaction) =>
-      transaction.accountId === account.id,
+  const totalIncome = useMemo(
+    () =>
+      accountTransactions
+        .filter(
+          (transaction) =>
+            transaction.type === "income",
+        )
+        .reduce(
+          (total, transaction) =>
+            total + transaction.amount,
+          0,
+        ),
+    [accountTransactions],
   )
 
-  /*
-   * Total money received by this account.
-   */
-  const totalIncome = accountTransactions
-    .filter(
-      (transaction) =>
-        transaction.type === "income",
-    )
-    .reduce(
-      (total, transaction) =>
-        total + transaction.amount,
-      0,
-    )
+  const totalExpenses = useMemo(
+    () =>
+      accountTransactions
+        .filter(
+          (transaction) =>
+            transaction.type === "expense",
+        )
+        .reduce(
+          (total, transaction) =>
+            total + transaction.amount,
+          0,
+        ),
+    [accountTransactions],
+  )
 
-  /*
-   * Total money spent from this account.
-   */
-  const totalExpenses = accountTransactions
-    .filter(
-      (transaction) =>
-        transaction.type === "expense",
-    )
-    .reduce(
-      (total, transaction) =>
-        total + transaction.amount,
-      0,
-    )
+  const AccountIcon = account
+    ? accountTypeIcons[account.type]
+    : Wallet
 
-  /*
-   * Live balance.
-   *
-   * account.balance represents the starting
-   * balance entered when the account was created.
-   *
-   * Current balance =
-   * starting balance + income - expenses
-   */
-  const currentBalance =
-    account.balance +
-    totalIncome -
-    totalExpenses
+  function handleDelete() {
+    if (!account) {
+      return
+    }
 
-  const transactionCount =
-    accountTransactions.length
-
-  const handleDelete = () => {
     const confirmed = window.confirm(
-      `Delete "${account.name}"?\n\nThis account will be permanently removed from FinFlow. This action cannot be undone.`,
+      `Are you sure you want to delete "${account.name}"?`,
     )
 
     if (!confirmed) {
@@ -136,45 +133,93 @@ function AccountDetails() {
     navigate("/accounts")
   }
 
-  return (
-    <div className="pb-10">
-      {/* Back navigation */}
-      <Link
-        to="/accounts"
-        className="inline-flex items-center gap-2 text-sm font-medium text-(--text-secondary) transition hover:text-(--text-primary)"
-      >
-        <ArrowLeft size={17} />
-        Back to Accounts
-      </Link>
+  if (accountsLoading) {
+    return (
+      <section className="space-y-6">
+        <div className="h-8 w-40 animate-pulse rounded-lg bg-[var(--surface-hover)]" />
 
-      {/* Header */}
-      <header className="mt-6 flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-        <div className="flex items-start gap-4">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-400">
-            <Wallet size={26} />
+        <div className="h-56 animate-pulse rounded-2xl border border-[var(--border)] bg-[var(--surface)]" />
+
+        <div className="h-80 animate-pulse rounded-2xl border border-[var(--border)] bg-[var(--surface)]" />
+      </section>
+    )
+  }
+
+  if (!account) {
+    return (
+      <section className="flex min-h-[60vh] items-center justify-center">
+        <div className="w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-8 text-center shadow-sm">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--surface-hover)]">
+            <Wallet
+              size={22}
+              className="text-[var(--text-secondary)]"
+            />
           </div>
 
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-3xl font-bold tracking-tight text-(--text-primary)">
+          <h1 className="text-xl font-semibold text-[var(--text-primary)]">
+            Account not found
+          </h1>
+
+          <p className="mt-2 text-sm text-[var(--text-secondary)]">
+            The account you're looking for doesn't
+            exist or may have been deleted.
+          </p>
+
+          <Link
+            to="/accounts"
+            className="mt-6 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700"
+          >
+            <ArrowLeft size={16} />
+            Back to accounts
+          </Link>
+        </div>
+      </section>
+    )
+  }
+
+  return (
+    <section className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <Link
+            to="/accounts"
+            className="mb-3 inline-flex items-center gap-2 text-sm font-medium text-[var(--text-secondary)] transition hover:text-[var(--text-primary)]"
+          >
+            <ArrowLeft size={16} />
+            Back to accounts
+          </Link>
+
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600">
+              <AccountIcon size={22} />
+            </div>
+
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
                 {account.name}
               </h1>
 
-              <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-400">
-                Active
-              </span>
-            </div>
+              <div className="mt-1 flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+                <span>
+                  {accountTypeLabels[account.type]}
+                </span>
 
-            <p className="mt-1 text-(--text-secondary)">
-              {accountTypeLabels[account.type]} account
-            </p>
+                <span className="h-1 w-1 rounded-full bg-[var(--text-muted)]" />
+
+                <span className="inline-flex items-center gap-1.5 text-emerald-600">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                  Active
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           <Link
             to={`/accounts/${account.id}/edit`}
-            className="inline-flex items-center gap-2 rounded-xl border border-(--border) px-4 py-2.5 text-sm font-medium text-(--text-secondary) transition hover:bg-(--surface-hover) hover:text-(--text-primary)"
+            className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm font-medium text-[var(--text-primary)] transition hover:border-[var(--border-hover)] hover:bg-[var(--surface-hover)]"
           >
             <Pencil size={16} />
             Edit
@@ -183,282 +228,274 @@ function AccountDetails() {
           <button
             type="button"
             onClick={handleDelete}
-            className="inline-flex items-center gap-2 rounded-xl border border-red-500/20 px-4 py-2.5 text-sm font-medium text-red-400 transition hover:bg-red-500/10"
+            className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-100"
           >
             <Trash2 size={16} />
             Delete
           </button>
         </div>
-      </header>
+      </div>
 
-      {/* Balance hero */}
-      <section className="mt-8 overflow-hidden rounded-2xl border border-(--border) bg-(--surface) p-6">
-        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+      {/* Balance Hero */}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm sm:p-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm font-medium text-(--text-secondary)">
-              Current balance
+            <p className="text-sm font-medium text-[var(--text-secondary)]">
+              Account balance
             </p>
 
-            <p
-              className={`mt-3 text-4xl font-bold tracking-tight ${
-                currentBalance >= 0
-                  ? "text-emerald-400"
-                  : "text-red-400"
-              }`}
-            >
+            <h2 className="mt-2 text-3xl font-bold tracking-tight text-[var(--text-primary)] sm:text-4xl">
               {formatCurrency(
-                currentBalance,
+                account.balance,
                 account.currency,
               )}
-            </p>
+            </h2>
 
-            <p className="mt-2 text-sm text-(--text-secondary)">
-              {accountTypeLabels[account.type]} ·{" "}
-              {account.currency}
+            <p className="mt-2 text-sm text-[var(--text-muted)]">
+              {account.currency} · {accountTypeLabels[account.type]}
             </p>
           </div>
 
           <Link
             to={`/transactions/new?accountId=${account.id}`}
-            className="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400"
+            className="inline-flex w-fit items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700"
           >
-            Add Transaction
             <ArrowUpRight size={17} />
+            Add transaction
           </Link>
         </div>
+      </div>
 
-        {/* Account metrics */}
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
-          <div className="rounded-xl bg-(--background) p-4">
-            <div className="flex items-center gap-2 text-emerald-400">
-              <ArrowUpRight size={17} />
-
-              <p className="text-xs font-medium uppercase tracking-wide">
-                Money received
-              </p>
-            </div>
-
-            <p className="mt-3 text-xl font-bold text-(--text-primary)">
-              {formatCurrency(
-                totalIncome,
-                account.currency,
-              )}
+      {/* Metrics */}
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-[var(--text-secondary)]">
+              Money received
             </p>
+
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600">
+              <ArrowDownRight size={18} />
+            </div>
           </div>
 
-          <div className="rounded-xl bg-(--background) p-4">
-            <div className="flex items-center gap-2 text-red-400">
-              <ArrowDownRight size={17} />
-
-              <p className="text-xs font-medium uppercase tracking-wide">
-                Money spent
-              </p>
-            </div>
-
-            <p className="mt-3 text-xl font-bold text-(--text-primary)">
-              {formatCurrency(
-                totalExpenses,
-                account.currency,
-              )}
-            </p>
-          </div>
-
-          <div className="rounded-xl bg-(--background) p-4">
-            <div className="flex items-center gap-2 text-(--text-secondary)">
-              <CreditCard size={17} />
-
-              <p className="text-xs font-medium uppercase tracking-wide">
-                Transactions
-              </p>
-            </div>
-
-            <p className="mt-3 text-xl font-bold text-(--text-primary)">
-              {transactionCount}
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Account information */}
-      <section className="mt-8 rounded-2xl border border-(--border) bg-(--surface) p-6">
-        <div>
-          <h2 className="text-xl font-semibold text-(--text-primary)">
-            Account Information
-          </h2>
-
-          <p className="mt-1 text-sm text-(--text-secondary)">
-            Details about this financial account.
+          <p className="mt-4 text-xl font-semibold text-[var(--text-primary)]">
+            {formatCurrency(
+              totalIncome,
+              account.currency,
+            )}
           </p>
         </div>
 
-        <div className="mt-6 grid gap-5 sm:grid-cols-2">
-          <div className="rounded-xl border border-(--border) bg-(--background) p-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-(--text-secondary)">
-              Account name
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-[var(--text-secondary)]">
+              Money spent
             </p>
 
-            <p className="mt-2 font-semibold text-(--text-primary)">
-              {account.name}
-            </p>
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-500/10 text-red-600">
+              <ArrowUpRight size={18} />
+            </div>
           </div>
 
-          <div className="rounded-xl border border-(--border) bg-(--background) p-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-(--text-secondary)">
+          <p className="mt-4 text-xl font-semibold text-[var(--text-primary)]">
+            {formatCurrency(
+              totalExpenses,
+              account.currency,
+            )}
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-[var(--text-secondary)]">
+              Transactions
+            </p>
+
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600">
+              <CreditCard size={18} />
+            </div>
+          </div>
+
+          <p className="mt-4 text-xl font-semibold text-[var(--text-primary)]">
+            {accountTransactions.length}
+          </p>
+        </div>
+      </div>
+
+      {/* Account Information */}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm">
+        <div className="border-b border-[var(--border)] px-6 py-5">
+          <h2 className="font-semibold text-[var(--text-primary)]">
+            Account information
+          </h2>
+
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">
+            Details about this account.
+          </p>
+        </div>
+
+        <div className="grid gap-5 p-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">
               Account type
             </p>
 
-            <p className="mt-2 font-semibold text-(--text-primary)">
+            <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">
               {accountTypeLabels[account.type]}
             </p>
           </div>
 
-          <div className="rounded-xl border border-(--border) bg-(--background) p-4">
-            <p className="text-xs font-medium uppercase tracking-wide text-(--text-secondary)">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">
               Currency
             </p>
 
-            <p className="mt-2 font-semibold text-(--text-primary)">
+            <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">
               {account.currency}
             </p>
           </div>
 
-          <div className="rounded-xl border border-(--border) bg-(--background) p-4">
-            <div className="flex items-center gap-2">
-              <CalendarDays
-                size={15}
-                className="text-(--text-secondary)"
-              />
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">
+              Created
+            </p>
 
-              <p className="text-xs font-medium uppercase tracking-wide text-(--text-secondary)">
-                Date added
-              </p>
-            </div>
+            <p className="mt-1 flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]">
+              <CalendarDays size={15} />
+              {formatDate(account.createdAt)}
+            </p>
+          </div>
 
-            <p className="mt-2 font-semibold text-(--text-primary)">
-              {new Date(
-                account.createdAt,
-              ).toLocaleDateString("en-US", {
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-              })}
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">
+              Account ID
+            </p>
+
+            <p className="mt-1 truncate text-sm font-medium text-[var(--text-primary)]">
+              {account.id}
             </p>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Account activity */}
-      <section className="mt-8 rounded-2xl border border-(--border) bg-(--surface) p-6">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      {/* Account Activity */}
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm">
+        <div className="flex flex-col gap-3 border-b border-[var(--border)] px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-(--text-primary)">
-              Account Activity
+            <h2 className="font-semibold text-[var(--text-primary)]">
+              Account activity
             </h2>
 
-            <p className="mt-1 text-sm text-(--text-secondary)">
-              Transactions associated with this account.
+            <p className="mt-1 text-sm text-[var(--text-secondary)]">
+              Transactions linked to this account.
             </p>
           </div>
 
-          <span className="rounded-full bg-(--surface-hover) px-3 py-1 text-xs font-medium text-(--text-secondary)">
-            {transactionCount}{" "}
-            {transactionCount === 1
-              ? "transaction"
-              : "transactions"}
-          </span>
+          {accountTransactions.length > 0 && (
+            <Link
+              to="/transactions"
+              className="text-sm font-medium text-emerald-600 transition hover:text-emerald-700"
+            >
+              View all
+            </Link>
+          )}
         </div>
 
-        {accountTransactions.length > 0 ? (
-          <div className="mt-6 space-y-3">
-            {accountTransactions.map(
-              (transaction) => (
-                <div
+        {transactionsLoading ? (
+          <div className="space-y-4 p-6">
+            {[1, 2, 3].map((item) => (
+              <div
+                key={item}
+                className="h-14 animate-pulse rounded-lg bg-[var(--surface-hover)]"
+              />
+            ))}
+          </div>
+        ) : accountTransactions.length === 0 ? (
+          <div className="px-6 py-12 text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--surface-hover)]">
+              <CreditCard
+                size={20}
+                className="text-[var(--text-secondary)]"
+              />
+            </div>
+
+            <h3 className="font-medium text-[var(--text-primary)]">
+              No transactions yet
+            </h3>
+
+            <p className="mx-auto mt-1 max-w-sm text-sm text-[var(--text-secondary)]">
+              Transactions linked to this account will
+              appear here.
+            </p>
+
+            <Link
+              to={`/transactions/new?accountId=${account.id}`}
+              className="mt-5 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700"
+            >
+              <ArrowUpRight size={16} />
+              Add transaction
+            </Link>
+          </div>
+        ) : (
+          <div className="divide-y divide-[var(--border)]">
+            {accountTransactions.map((transaction) => {
+              const isIncome =
+                transaction.type === "income"
+
+              return (
+                <Link
                   key={transaction.id}
-                  className="flex flex-col gap-3 rounded-xl border border-(--border) bg-(--background) p-4 transition hover:border-(--text-secondary) sm:flex-row sm:items-center sm:justify-between"
+                  to={`/transactions/${transaction.id}`}
+                  className="flex items-center justify-between gap-4 px-6 py-4 transition hover:bg-[var(--surface-hover)]"
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     <div
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-                        transaction.type === "income"
-                          ? "bg-emerald-500/10 text-emerald-400"
-                          : "bg-red-500/10 text-red-400"
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
+                        isIncome
+                          ? "bg-emerald-500/10 text-emerald-600"
+                          : "bg-red-500/10 text-red-600"
                       }`}
                     >
-                      {transaction.type ===
-                      "income" ? (
-                        <ArrowUpRight size={18} />
-                      ) : (
+                      {isIncome ? (
                         <ArrowDownRight size={18} />
+                      ) : (
+                        <ArrowUpRight size={18} />
                       )}
                     </div>
 
                     <div className="min-w-0">
-                      <p className="truncate font-medium text-(--text-primary)">
+                      <p className="truncate text-sm font-medium text-[var(--text-primary)]">
                         {transaction.description}
                       </p>
 
-                      <p className="mt-1 text-sm text-(--text-secondary)">
+                      <p className="mt-1 text-xs text-[var(--text-muted)]">
                         {transaction.category} ·{" "}
-                        {new Date(
-                          transaction.date,
-                        ).toLocaleDateString(
-                          "en-US",
-                          {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          },
-                        )}
+                        {formatDate(transaction.date)}
                       </p>
                     </div>
                   </div>
 
                   <p
-                    className={`shrink-0 font-semibold ${
-                      transaction.type === "income"
-                        ? "text-emerald-400"
-                        : "text-red-400"
+                    className={`shrink-0 text-sm font-semibold ${
+                      isIncome
+                        ? "text-emerald-600"
+                        : "text-red-600"
                     }`}
                   >
-                    {transaction.type === "income"
-                      ? "+"
-                      : "-"}
+                    {isIncome ? "+" : "−"}
                     {formatCurrency(
                       transaction.amount,
                       account.currency,
                     )}
                   </p>
-                </div>
-              ),
-            )}
-          </div>
-        ) : (
-          <div className="mt-6 rounded-xl border border-dashed border-(--border) p-8 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-(--surface-hover) text-(--text-secondary)">
-              <CreditCard size={21} />
-            </div>
-
-            <p className="mt-4 font-semibold text-(--text-primary)">
-              No transactions yet
-            </p>
-
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-(--text-secondary)">
-              Transactions associated with this
-              account will appear here once you
-              start recording your activity.
-            </p>
-
-            <Link
-              to={`/transactions/new?accountId=${account.id}`}
-              className="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400"
-            >
-              Add Transaction
-              <ArrowUpRight size={17} />
-            </Link>
+                </Link>
+              )
+            })}
           </div>
         )}
-      </section>
-    </div>
+      </div>
+    </section>
   )
 }
 
