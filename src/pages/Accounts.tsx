@@ -21,6 +21,7 @@ import { useAccountsContext } from "../context/AccountsContext"
 import { usePreferences } from "../context/PreferencesContext"
 
 import {
+  calculateAccountBalance,
   calculateFinancialSummary,
 } from "../utils/financial"
 
@@ -130,12 +131,19 @@ function Accounts() {
    * We do not calculate account balances from transactions.
    * We also do not perform currency conversion.
    */
-  const totalAccountBalance =
+  const totalAccountBalance = useMemo(
+  () =>
     accounts.reduce(
       (total, account) =>
-        total + account.balance,
+        total +
+        calculateAccountBalance(
+          account,
+          transactions,
+        ),
       0,
-    )
+    ),
+  [accounts, transactions],
+)
 
   const recentTransactions =
     useMemo(() => {
@@ -493,6 +501,12 @@ function Accounts() {
     const accountTransactions =
       getAccountTransactions(account.id)
 
+    const currentBalance =
+  calculateAccountBalance(
+    account,
+    transactions,
+  )
+
     const accountIncome =
       accountTransactions
         .filter(
@@ -681,7 +695,7 @@ function Accounts() {
 
           <p className="mt-0.5 text-xl font-bold tracking-tight text-[var(--text-primary)]">
             {formatCurrency(
-              account.balance,
+              currentBalance,
               account.currency,
             )}
           </p>

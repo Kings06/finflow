@@ -39,9 +39,6 @@ function AddTransaction() {
       ? accountIdFromUrl
       : ""
 
-  const selectedAccount = accounts.find(
-    (account) => account.id === initialAccountId,
-  )
 
   const [description, setDescription] =
     useState("")
@@ -61,6 +58,10 @@ function AddTransaction() {
 
   const [selectedAccountId, setSelectedAccountId] =
     useState(initialAccountId)
+
+   const selectedAccount = accounts.find(
+    (account) => account.id === selectedAccountId,
+  )
 
   const [submitting, setSubmitting] =
     useState(false)

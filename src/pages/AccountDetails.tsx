@@ -82,35 +82,43 @@ function AccountDetails() {
       })
   }, [account, transactions])
 
-  const totalIncome = useMemo(
-    () =>
-      accountTransactions
-        .filter(
-          (transaction) =>
-            transaction.type === "income",
-        )
-        .reduce(
-          (total, transaction) =>
-            total + transaction.amount,
-          0,
-        ),
-    [accountTransactions],
-  )
+  const totalIncome = useMemo(() => {
+    return accountTransactions
+      .filter(
+        (transaction) =>
+          transaction.type === "income",
+      )
+      .reduce(
+        (total, transaction) =>
+          total + transaction.amount,
+        0,
+      )
+  }, [accountTransactions])
 
-  const totalExpenses = useMemo(
-    () =>
-      accountTransactions
-        .filter(
-          (transaction) =>
-            transaction.type === "expense",
-        )
-        .reduce(
-          (total, transaction) =>
-            total + transaction.amount,
-          0,
-        ),
-    [accountTransactions],
-  )
+  const totalExpenses = useMemo(() => {
+    return accountTransactions
+      .filter(
+        (transaction) =>
+          transaction.type === "expense",
+      )
+      .reduce(
+        (total, transaction) =>
+          total + transaction.amount,
+        0,
+      )
+  }, [accountTransactions])
+
+  const currentBalance = useMemo(() => {
+    if (!account) {
+      return 0
+    }
+
+    return (
+      account.balance +
+      totalIncome -
+      totalExpenses
+    )
+  }, [account, totalIncome, totalExpenses])
 
   const AccountIcon = account
     ? accountTypeIcons[account.type]
@@ -246,13 +254,14 @@ function AccountDetails() {
 
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-[var(--text-primary)] sm:text-4xl">
               {formatCurrency(
-                account.balance,
+                currentBalance,
                 account.currency,
               )}
             </h2>
 
             <p className="mt-2 text-sm text-[var(--text-muted)]">
-              {account.currency} · {accountTypeLabels[account.type]}
+              {account.currency} ·{" "}
+              {accountTypeLabels[account.type]}
             </p>
           </div>
 
