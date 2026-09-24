@@ -15,6 +15,7 @@ import { Link } from "react-router-dom"
 
 import type { Transaction } from "../types/transaction"
 
+import { usePreferences } from "../context/PreferencesContext"
 import { formatCurrency } from "../utils/currency"
 
 type TransactionItemProps = {
@@ -24,6 +25,8 @@ type TransactionItemProps = {
 function TransactionItem({
   transaction,
 }: TransactionItemProps) {
+  const { currency } = usePreferences()
+
   const isIncome =
     transaction.type === "income"
 
@@ -38,8 +41,9 @@ function TransactionItem({
   } as const
 
   const CategoryIcon =
-    categoryIcons[transaction.category as keyof typeof categoryIcons] ??
-    CreditCard
+    categoryIcons[
+      transaction.category as keyof typeof categoryIcons
+    ] ?? CreditCard
 
   const formattedDate = new Date(
     transaction.date,
@@ -104,6 +108,7 @@ function TransactionItem({
                 {isIncome ? "+" : "-"}
                 {formatCurrency(
                   transaction.amount,
+                  currency,
                 )}
               </p>
 

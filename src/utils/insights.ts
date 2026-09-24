@@ -1,3 +1,4 @@
+import type { Currency } from "../context/PreferencesContext"
 import type { Transaction } from "../types/transaction"
 
 export type FinancialInsight = {
@@ -8,6 +9,7 @@ export type FinancialInsight = {
 
 export function generateFinancialInsights(
   transactions: Transaction[],
+  currency: Currency,
 ): FinancialInsight[] {
   if (transactions.length === 0) {
     return []
@@ -30,7 +32,7 @@ export function generateFinancialInsights(
     insights.push({
       type: "positive",
       title: "Healthy cash flow",
-      message: `Your income currently exceeds your expenses by ${formatInsightAmount(net)}.`,
+      message: `Your income currently exceeds your expenses by ${formatInsightAmount(net, currency)}.`,
     })
   } else if (expenses > income) {
     const deficit = expenses - income
@@ -38,7 +40,7 @@ export function generateFinancialInsights(
     insights.push({
       type: "warning",
       title: "Spending is above income",
-      message: `Your expenses currently exceed your income by ${formatInsightAmount(deficit)}.`,
+      message: `Your expenses currently exceed your income by ${formatInsightAmount(deficit, currency)}.`,
     })
   }
 
@@ -118,10 +120,22 @@ export function generateFinancialInsights(
   return insights.slice(0, 4)
 }
 
-function formatInsightAmount(amount: number) {
-  return new Intl.NumberFormat("en-NG", {
+function formatInsightAmount(
+  amount: number,
+  currency: Currency,
+) {
+  const locale =
+    currency === "NGN"
+      ? "en-NG"
+      : currency === "USD"
+        ? "en-US"
+        : currency === "EUR"
+          ? "de-DE"
+          : "en-GB"
+
+  return new Intl.NumberFormat(locale, {
     style: "currency",
-    currency: "NGN",
+    currency,
     maximumFractionDigits: 0,
   }).format(amount)
 }

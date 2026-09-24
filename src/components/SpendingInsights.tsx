@@ -1,12 +1,15 @@
 import { useMemo } from "react"
 import { useTransactionsContext } from "../context/TransactionsContext"
+import { usePreferences } from "../context/PreferencesContext"
 import { generateFinancialInsights } from "../utils/insights"
 
 function SpendingInsights() {
   const { transactions } = useTransactionsContext()
 
+  const { currency } = usePreferences()
+
   const insights = useMemo(
-    () => generateFinancialInsights(transactions),
+    () => generateFinancialInsights(transactions, currency),
     [transactions],
   )
 

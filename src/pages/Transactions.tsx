@@ -8,6 +8,8 @@ import {
   useTransactionsContext,
 } from "../context/TransactionsContext"
 
+import { usePreferences } from "../context/PreferencesContext"
+
 import TransactionItem from "../components/TransactionItem"
 
 import {
@@ -29,6 +31,8 @@ function Transactions() {
     loading,
     error,
   } = useTransactionsContext()
+
+  const { currency } = usePreferences()
 
   const [search, setSearch] = useState("")
 
@@ -341,6 +345,7 @@ function Transactions() {
           <p className="mt-2 text-2xl font-bold text-emerald-500">
             {formatCurrency(
               transactionTotals.income,
+              currency,
             )}
           </p>
         </div>
@@ -364,6 +369,7 @@ function Transactions() {
           <p className="mt-2 text-2xl font-bold text-red-500">
             {formatCurrency(
               transactionTotals.expenses,
+              currency,
             )}
           </p>
         </div>
@@ -391,7 +397,7 @@ function Transactions() {
                 : "text-red-500"
             }`}
           >
-            {formatCurrency(netAmount)}
+            {formatCurrency(netAmount, currency)}
           </p>
         </div>
       </section>

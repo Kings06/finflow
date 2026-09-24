@@ -13,6 +13,7 @@ import {
 
 import FinancialChart from "../components/FinancialChart"
 import { useTransactionsContext } from "../context/TransactionsContext"
+import { usePreferences } from "../context/PreferencesContext"
 import { calculateFinancialSummary } from "../utils/financial"
 import { buildExpenseBreakdown } from "../utils/expenseBreakdown"
 import { formatCurrency } from "../utils/currency"
@@ -260,6 +261,8 @@ function Analytics() {
     loading,
     error,
   } = useTransactionsContext()
+
+  const { currency } = usePreferences()
 
   const [period, setPeriod] =
     useState<AnalyticsPeriod>("month")
@@ -528,6 +531,7 @@ function Analytics() {
           <p className="mt-4 text-2xl font-bold text-emerald-600">
             {formatCurrency(
               summary.totalIncome,
+              currency,
             )}
           </p>
 
@@ -554,6 +558,7 @@ function Analytics() {
           <p className="mt-4 text-2xl font-bold text-red-500">
             {formatCurrency(
               summary.totalExpenses,
+              currency,
             )}
           </p>
 
@@ -586,6 +591,7 @@ function Analytics() {
           >
             {formatCurrency(
               summary.totalBalance,
+              currency,
             )}
           </p>
 
@@ -688,6 +694,7 @@ function Analytics() {
                           <span className="shrink-0 text-[var(--text-secondary)]">
                             {formatCurrency(
                               expense.amount,
+                              currency,
                             )}
                           </span>
                         </div>
@@ -889,6 +896,7 @@ function Analytics() {
                       <strong>
                         {formatCurrency(
                           highestExpense.amount,
+                          currency,
                         )}
                       </strong>
                       .
@@ -916,6 +924,7 @@ function Analytics() {
                     <strong>
                       {formatCurrency(
                         averageTransaction,
+                        currency,
                       )}
                     </strong>
                     .

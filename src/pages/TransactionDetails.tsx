@@ -17,6 +17,8 @@ import {
   useAccountsContext,
 } from "../context/AccountsContext"
 
+import { usePreferences } from "../context/PreferencesContext"
+
 import { formatCurrency } from "../utils/currency"
 
 import type { TransactionType } from "../types/transaction"
@@ -42,6 +44,8 @@ function TransactionDetails() {
     editTransaction,
     removeTransaction,
   } = useTransactionsContext()
+
+  const { currency } = usePreferences()
 
   const { accounts } = useAccountsContext()
 
@@ -538,6 +542,7 @@ function TransactionDetails() {
                   {isIncome ? "+" : "-"}
                   {formatCurrency(
                     transaction.amount,
+                    currency,
                   )}
                 </h2>
               </div>

@@ -1,10 +1,14 @@
 import { useTransactionsContext } from "../context/TransactionsContext"
+import { usePreferences } from "../context/PreferencesContext"
+
 import { calculateFinancialSummary } from "../utils/financial"
 import { formatCurrency } from "../utils/currency"
 
 function FinancialSummary() {
   const { transactions, loading, error } =
     useTransactionsContext()
+
+  const { currency } = usePreferences()
 
   if (loading) {
     return (
@@ -21,11 +25,15 @@ function FinancialSummary() {
     return null
   }
 
-  const summary = calculateFinancialSummary(transactions)
+  const summary = calculateFinancialSummary(
+    transactions,
+  )
 
   const savingsRate =
     summary.totalIncome > 0
-      ? (summary.totalBalance / summary.totalIncome) * 100
+      ? (summary.totalBalance /
+          summary.totalIncome) *
+        100
       : 0
 
   const balanceIsPositive =
@@ -71,7 +79,10 @@ function FinancialSummary() {
                 : "text-red-500"
             }
           >
-            {formatCurrency(summary.totalBalance)}
+            {formatCurrency(
+              summary.totalBalance,
+              currency,
+            )}
           </span>
         </h2>
 
@@ -102,7 +113,10 @@ function FinancialSummary() {
           </p>
 
           <p className="mt-1 font-semibold text-emerald-500">
-            {formatCurrency(summary.totalIncome)}
+            {formatCurrency(
+              summary.totalIncome,
+              currency,
+            )}
           </p>
         </div>
 
@@ -117,7 +131,10 @@ function FinancialSummary() {
           </p>
 
           <p className="mt-1 font-semibold text-red-500">
-            {formatCurrency(summary.totalExpenses)}
+            {formatCurrency(
+              summary.totalExpenses,
+              currency,
+            )}
           </p>
         </div>
 

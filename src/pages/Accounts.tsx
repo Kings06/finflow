@@ -696,12 +696,12 @@ function Accounts() {
           <p className="mt-0.5 text-xl font-bold tracking-tight text-[var(--text-primary)]">
             {formatCurrency(
               currentBalance,
-              account.currency,
+              currency,
             )}
           </p>
 
           <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">
-            {account.currency}
+            {currency}
           </p>
         </div>
 
@@ -725,7 +725,7 @@ function Accounts() {
             <p className="mt-0.5 truncate text-xs font-semibold text-emerald-600">
               {formatCurrency(
                 accountIncome,
-                account.currency,
+                currency,
               )}
             </p>
           </div>
@@ -738,7 +738,7 @@ function Accounts() {
             <p className="mt-0.5 truncate text-xs font-semibold text-red-600">
               {formatCurrency(
                 accountExpenses,
-                account.currency,
+                currency,
               )}
             </p>
           </div>

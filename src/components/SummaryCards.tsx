@@ -1,18 +1,68 @@
+import { useMemo } from "react"
+
 import { useTransactionsContext } from "../context/TransactionsContext"
-import { calculateFinancialSummary } from "../utils/financial"
+import { useAccountsContext } from "../context/AccountsContext"
+import { usePreferences } from "../context/PreferencesContext"
+
+import {
+  calculateAccountBalance,
+  calculateFinancialSummary,
+} from "../utils/financial"
+
 import { formatCurrency } from "../utils/currency"
 import { getFinancialStatus } from "../utils/financialStatus"
 
 function SummaryCards() {
-  const { transactions, loading, error } =
-    useTransactionsContext()
+  const {
+    transactions,
+    loading: transactionsLoading,
+    error: transactionsError,
+  } = useTransactionsContext()
 
-  const summary = calculateFinancialSummary(transactions)
+  const {
+    accounts,
+    loading: accountsLoading,
+    error: accountsError,
+  } = useAccountsContext()
+
+  const { currency } = usePreferences()
+
+  const loading =
+    transactionsLoading || accountsLoading
+
+  const error =
+    transactionsError ?? accountsError
+
+  const summary = useMemo(
+    () =>
+      calculateFinancialSummary(
+        transactions,
+      ),
+    [transactions],
+  )
+
+  const totalAccountBalance = useMemo(
+    () =>
+      accounts.reduce(
+        (total, account) =>
+          total +
+          calculateAccountBalance(
+            account,
+            transactions,
+          ),
+        0,
+      ),
+    [accounts, transactions],
+  )
 
   if (loading) {
     return (
       <section className="mt-8 grid gap-4 md:grid-cols-3">
-        {["Balance", "Income", "Expenses"].map((item) => (
+        {[
+          "Balance",
+          "Income",
+          "Expenses",
+        ].map((item) => (
           <div
             key={item}
             className="h-36 animate-pulse rounded-2xl"
@@ -30,8 +80,10 @@ function SummaryCards() {
       <div
         className="mt-8 rounded-2xl border p-6 text-red-400"
         style={{
-          borderColor: "rgba(239, 68, 68, 0.2)",
-          backgroundColor: "rgba(239, 68, 68, 0.1)",
+          borderColor:
+            "rgba(239, 68, 68, 0.2)",
+          backgroundColor:
+            "rgba(239, 68, 68, 0.1)",
         }}
       >
         {error}
@@ -42,8 +94,8 @@ function SummaryCards() {
   const cards = [
     {
       title: "Total Balance",
-      amount: summary.totalBalance,
-      description: "Available balance",
+      amount: totalAccountBalance,
+      description: "Across all accounts",
     },
     {
       title: "Total Income",
@@ -58,7 +110,7 @@ function SummaryCards() {
   ]
 
   const balanceStatus = getFinancialStatus(
-    summary.totalBalance,
+    totalAccountBalance,
   )
 
   const balanceColor =
@@ -110,12 +162,16 @@ function SummaryCards() {
                 !isBalance ||
                 balanceStatus === "neutral"
                   ? {
-                      color: "var(--text-primary)",
+                      color:
+                        "var(--text-primary)",
                     }
                   : undefined
               }
             >
-              {formatCurrency(card.amount)}
+              {formatCurrency(
+                card.amount,
+                currency,
+              )}
             </h2>
 
             <p

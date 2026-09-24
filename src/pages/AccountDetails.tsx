@@ -17,6 +17,7 @@ import { Link, useNavigate, useParams } from "react-router-dom"
 
 import { useAccountsContext } from "../context/AccountsContext"
 import { useTransactionsContext } from "../context/TransactionsContext"
+import { usePreferences } from "../context/PreferencesContext"
 import type { AccountType } from "../types/account"
 import { formatCurrency } from "../utils/currency"
 
@@ -58,6 +59,8 @@ function AccountDetails() {
     transactions,
     loading: transactionsLoading,
   } = useTransactionsContext()
+
+  const { currency } = usePreferences()
 
   const account = accounts.find(
     (currentAccount) => currentAccount.id === id,
@@ -255,7 +258,7 @@ function AccountDetails() {
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-[var(--text-primary)] sm:text-4xl">
               {formatCurrency(
                 currentBalance,
-                account.currency,
+                currency,
               )}
             </h2>
 
@@ -291,7 +294,7 @@ function AccountDetails() {
           <p className="mt-4 text-xl font-semibold text-[var(--text-primary)]">
             {formatCurrency(
               totalIncome,
-              account.currency,
+              currency,
             )}
           </p>
         </div>
@@ -310,7 +313,7 @@ function AccountDetails() {
           <p className="mt-4 text-xl font-semibold text-[var(--text-primary)]">
             {formatCurrency(
               totalExpenses,
-              account.currency,
+              currency,
             )}
           </p>
         </div>
@@ -495,7 +498,7 @@ function AccountDetails() {
                     {isIncome ? "+" : "−"}
                     {formatCurrency(
                       transaction.amount,
-                      account.currency,
+                      currency,
                     )}
                   </p>
                 </Link>

@@ -11,6 +11,9 @@ import {
 } from "recharts"
 
 import type { Transaction } from "../types/transaction"
+
+import { usePreferences } from "../context/PreferencesContext"
+
 import { buildFinancialChartData } from "../utils/chart"
 import { formatCurrency } from "../utils/currency"
 
@@ -21,6 +24,8 @@ type FinancialChartProps = {
 function FinancialChart({
   transactions,
 }: FinancialChartProps) {
+  const { currency } = usePreferences()
+
   const chartData = useMemo(
     () =>
       buildFinancialChartData(transactions),
@@ -106,7 +111,10 @@ function FinancialChart({
 
             <YAxis
               tickFormatter={(value) =>
-                formatCurrency(value)
+                formatCurrency(
+                  Number(value),
+                  currency,
+                )
               }
               tick={{
                 fill: "var(--text-muted)",
@@ -119,7 +127,10 @@ function FinancialChart({
 
             <Tooltip
               formatter={(value, name) => [
-                formatCurrency(Number(value)),
+                formatCurrency(
+                  Number(value),
+                  currency,
+                ),
                 name === "income"
                   ? "Income"
                   : "Expenses",
