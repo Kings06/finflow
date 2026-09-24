@@ -13,6 +13,10 @@ import {
   useTransactionsContext,
 } from "../context/TransactionsContext"
 
+import {
+  useAccountsContext,
+} from "../context/AccountsContext"
+
 import { formatCurrency } from "../utils/currency"
 
 import type { TransactionType } from "../types/transaction"
@@ -38,6 +42,8 @@ function TransactionDetails() {
     editTransaction,
     removeTransaction,
   } = useTransactionsContext()
+
+  const { accounts } = useAccountsContext()
 
   const transaction = transactions.find(
     (item) => item.id === Number(id),
@@ -68,6 +74,9 @@ function TransactionDetails() {
     useState("Food")
 
   const [date, setDate] =
+    useState("")
+
+  const [accountId, setAccountId] =
     useState("")
 
   if (loading) {
@@ -138,6 +147,11 @@ function TransactionDetails() {
   const isIncome =
     transaction.type === "income"
 
+  const linkedAccount = accounts.find(
+    (account) =>
+      account.id === transaction.accountId,
+  )
+
   const formattedDate = new Date(
     transaction.date,
   ).toLocaleDateString("en-US", {
@@ -154,6 +168,7 @@ function TransactionDetails() {
     setType(transaction.type)
     setCategory(transaction.category)
     setDate(transaction.date)
+    setAccountId(transaction.accountId ?? "")
     setFormError("")
     setIsEditing(true)
   }
@@ -166,6 +181,7 @@ function TransactionDetails() {
     setType(transaction.type)
     setCategory(transaction.category)
     setDate(transaction.date)
+    setAccountId(transaction.accountId ?? "")
     setFormError("")
     setIsEditing(false)
   }
@@ -217,12 +233,7 @@ function TransactionDetails() {
           type,
           category,
           date,
-          ...(transaction.accountId
-            ? {
-                accountId:
-                  transaction.accountId,
-              }
-            : {}),
+          accountId: accountId || undefined,
         },
       )
 
@@ -453,12 +464,43 @@ function TransactionDetails() {
               </div>
             </div>
 
+            <div>
+              <label
+                htmlFor="accountId"
+                className="text-sm font-medium text-[var(--text-secondary)]"
+              >
+                Account
+              </label>
+
+              <select
+                id="accountId"
+                value={accountId}
+                onChange={(event) =>
+                  setAccountId(
+                    event.target.value,
+                  )
+                }
+                className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
+              >
+                <option value="">
+                  No linked account
+                </option>
+
+                {accounts.map((account) => (
+                  <option
+                    key={account.id}
+                    value={account.id}
+                  >
+                    {account.name} ({account.currency})
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <button
                 type="button"
-                onClick={
-                  handleCancelEditing
-                }
+                onClick={handleCancelEditing}
                 disabled={isSaving}
                 className="rounded-xl border border-[var(--border)] px-5 py-3 text-sm font-semibold text-[var(--text-primary)] transition hover:bg-[var(--surface-hover)] disabled:cursor-not-allowed disabled:opacity-60"
               >
@@ -562,7 +604,9 @@ function TransactionDetails() {
                 </p>
 
                 <p className="mt-2 font-medium text-[var(--text-primary)]">
-                  Linked account
+                  {linkedAccount
+                    ? `${linkedAccount.name} (${linkedAccount.currency})`
+                    : "Linked account unavailable"}
                 </p>
               </div>
             )}

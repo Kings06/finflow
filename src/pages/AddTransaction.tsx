@@ -25,7 +25,9 @@ function AddTransaction() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
 
-  const { addTransaction } = useTransactionsContext()
+  const { addTransaction } =
+    useTransactionsContext()
+
   const { accounts } = useAccountsContext()
 
   const accountIdFromUrl =
@@ -34,11 +36,11 @@ function AddTransaction() {
   const initialAccountId =
     accountIdFromUrl &&
     accounts.some(
-      (account) => account.id === accountIdFromUrl,
+      (account) =>
+        account.id === accountIdFromUrl,
     )
       ? accountIdFromUrl
       : ""
-
 
   const [description, setDescription] =
     useState("")
@@ -59,15 +61,16 @@ function AddTransaction() {
   const [selectedAccountId, setSelectedAccountId] =
     useState(initialAccountId)
 
-   const selectedAccount = accounts.find(
-    (account) => account.id === selectedAccountId,
-  )
-
   const [submitting, setSubmitting] =
     useState(false)
 
   const [error, setError] =
     useState("")
+
+  const selectedAccount = accounts.find(
+    (account) =>
+      account.id === selectedAccountId,
+  )
 
   const handleSubmit = async (
     event: FormEvent<HTMLFormElement>,
@@ -293,6 +296,7 @@ function AddTransaction() {
             </div>
           </div>
 
+          {/* Account */}
           <div>
             <label
               htmlFor="account"
@@ -309,10 +313,14 @@ function AddTransaction() {
                   event.target.value,
                 )
               }
-              className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30"
+              required
+              disabled={accounts.length === 0}
+              className="mt-2 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <option value="">
-                Select an account
+                {accounts.length === 0
+                  ? "No accounts available"
+                  : "Select an account"}
               </option>
 
               {accounts.map((account) => (
@@ -328,6 +336,13 @@ function AddTransaction() {
                 </option>
               ))}
             </select>
+
+            {accounts.length === 0 && (
+              <p className="mt-2 text-sm text-[var(--text-secondary)]">
+                Create an account before adding a
+                transaction.
+              </p>
+            )}
           </div>
 
           {error && (
@@ -346,7 +361,10 @@ function AddTransaction() {
 
             <button
               type="submit"
-              disabled={submitting}
+              disabled={
+                submitting ||
+                accounts.length === 0
+              }
               className="rounded-xl bg-emerald-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {submitting
